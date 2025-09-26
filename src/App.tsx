@@ -1,33 +1,49 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import EmployeePage from "./pages/EmployeePage";
-import ManagementPage from "./pages/ManagementPage";
-import PaymentRequestPage from "./pages/PaymentRequestPage";
-import NotFound from "./pages/NotFound";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { LoginPage } from './components/Auth/LoginPage';
+import { MaterialLayout } from './components/Layout/MaterialLayout';
+import { MaterialDashboard } from './components/Dashboard/MaterialDashboard';
+import { MaterialPaymentForm } from './components/Forms/MaterialPaymentForm';
 
-const queryClient = new QueryClient();
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+};
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/employee" element={<EmployeePage />} />
-          <Route path="/management" element={<ManagementPage />} />
-          <Route path="/new-request" element={<PaymentRequestPage />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const AppRoutes = () => {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return (
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
+  }
+
+  return (
+    <MaterialLayout>
+      <Routes>
+        <Route path="/dashboard" element={<MaterialDashboard />} />
+        <Route path="/new-request" element={<MaterialPaymentForm />} />
+        <Route path="/my-requests" element={<div>My Requests Page</div>} />
+        <Route path="/approvals" element={<div>Approvals Page</div>} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </MaterialLayout>
+  );
+};
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </AuthProvider>
+  );
+}
 
 export default App;
