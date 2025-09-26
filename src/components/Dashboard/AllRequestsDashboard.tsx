@@ -35,6 +35,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { RequestReviewModal } from './RequestReviewModal';
 
 interface PaymentRequest {
   id: string;
@@ -48,8 +49,9 @@ interface PaymentRequest {
   priority: 'low' | 'medium' | 'high' | 'urgent';
   submittedDate: string;
   dueDate: string;
-  status: 'pending' | 'approved' | 'rejected' | 'in_review';
+  status: 'pending' | 'approved' | 'rejected';
   description: string;
+  documents: string[];
   approvedBy?: string;
   approvedDate?: string;
 }
@@ -69,6 +71,7 @@ const mockRequests: PaymentRequest[] = [
     dueDate: '2024-01-22',
     status: 'approved',
     description: 'Monthly office supplies procurement',
+    documents: ['invoice.pdf', 'receipt.pdf'],
     approvedBy: 'Finance Manager',
     approvedDate: '2024-01-16'
   },
@@ -85,7 +88,8 @@ const mockRequests: PaymentRequest[] = [
     submittedDate: '2024-01-14',
     dueDate: '2024-01-20',
     status: 'pending',
-    description: 'Annual software license renewal'
+    description: 'Annual software license renewal',
+    documents: ['contract.pdf', 'quote.pdf']
   },
   {
     id: 'REQ-003',
@@ -99,8 +103,9 @@ const mockRequests: PaymentRequest[] = [
     priority: 'medium',
     submittedDate: '2024-01-13',
     dueDate: '2024-01-25',
-    status: 'in_review',
-    description: 'Business trip to client site'
+    status: 'pending',
+    description: 'Business trip to client site',
+    documents: ['itinerary.pdf']
   },
   {
     id: 'REQ-004',
@@ -115,7 +120,8 @@ const mockRequests: PaymentRequest[] = [
     submittedDate: '2024-01-12',
     dueDate: '2024-01-30',
     status: 'rejected',
-    description: 'New office furniture for meeting rooms'
+    description: 'New office furniture for meeting rooms',
+    documents: ['quote.pdf', 'floor_plan.pdf']
   },
   {
     id: 'REQ-005',
@@ -131,6 +137,7 @@ const mockRequests: PaymentRequest[] = [
     dueDate: '2024-01-28',
     status: 'approved',
     description: 'Digital marketing campaign materials',
+    documents: ['campaign_brief.pdf'],
     approvedBy: 'Finance Manager',
     approvedDate: '2024-01-12'
   }
@@ -147,6 +154,8 @@ export const AllRequestsDashboard: React.FC = () => {
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
   const [page, setPage] = useState(1);
+  const [selectedRequest, setSelectedRequest] = useState<PaymentRequest | null>(null);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -196,6 +205,11 @@ export const AllRequestsDashboard: React.FC = () => {
 
   const uniqueCategories = [...new Set(requests.map(r => r.category))];
   const uniqueDepartments = [...new Set(requests.map(r => r.department))];
+
+  const handleViewRequest = (request: PaymentRequest) => {
+    setSelectedRequest(request);
+    setReviewModalOpen(true);
+  };
 
   const exportToCSV = () => {
     const headers = ['Request ID', 'Employee', 'Vendor', 'Amount', 'Category', 'Department', 'Status', 'Submitted Date'];
@@ -266,7 +280,7 @@ export const AllRequestsDashboard: React.FC = () => {
                   <MenuItem value="pending">Pending</MenuItem>
                   <MenuItem value="approved">Approved</MenuItem>
                   <MenuItem value="rejected">Rejected</MenuItem>
-                  <MenuItem value="in_review">In Review</MenuItem>
+                  
                 </Select>
               </FormControl>
 
@@ -406,9 +420,13 @@ export const AllRequestsDashboard: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <Stack direction="row" spacing={1}>
-                        <IconButton size="small" color="primary">
-                          <Visibility />
-                        </IconButton>
+                  <IconButton 
+                    size="small" 
+                    color="primary"
+                    onClick={() => handleViewRequest(request)}
+                  >
+                    <Visibility />
+                  </IconButton>
                         <IconButton size="small" color="primary">
                           <Download />
                         </IconButton>
@@ -432,6 +450,13 @@ export const AllRequestsDashboard: React.FC = () => {
             </Box>
           )}
         </Card>
+
+        {/* Request Review Modal */}
+        <RequestReviewModal
+          open={reviewModalOpen}
+          onClose={() => setReviewModalOpen(false)}
+          request={selectedRequest}
+        />
       </Box>
     </LocalizationProvider>
   );

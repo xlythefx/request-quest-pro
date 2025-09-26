@@ -12,14 +12,16 @@ export const PaymentRequestForm = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState('USD');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [customCategory, setCustomCategory] = useState('');
 
   const currencies = [
     { code: 'USD', symbol: '$', name: 'US Dollar' },
     { code: 'EUR', symbol: '€', name: 'Euro' },
     { code: 'GBP', symbol: '£', name: 'British Pound' },
-    { code: 'BTC', symbol: '₿', name: 'Bitcoin' },
-    { code: 'ETH', symbol: 'Ξ', name: 'Ethereum' },
-    { code: 'USDT', symbol: '₮', name: 'Tether' },
+    { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+    { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+    { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
   ];
 
   const categories = [
@@ -47,11 +49,11 @@ export const PaymentRequestForm = () => {
     'Customer Service'
   ];
 
-  const priorities = [
-    { value: 'low', label: 'Low', color: 'outline' },
-    { value: 'medium', label: 'Medium', color: 'secondary' },
-    { value: 'high', label: 'High', color: 'destructive' }
-  ];
+  const getPriority = (amount: number) => {
+    if (amount < 2000) return { value: 'low', label: 'Low Priority', color: 'bg-green-100 text-green-800' };
+    if (amount < 10000) return { value: 'high', label: 'High Priority', color: 'bg-yellow-100 text-yellow-800' };
+    return { value: 'highest', label: 'Highest Priority', color: 'bg-red-100 text-red-800' };
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -81,9 +83,10 @@ export const PaymentRequestForm = () => {
 
   const getApprovalWorkflow = () => {
     const numAmount = parseFloat(amount);
-    if (numAmount < 2000) return { level: 'auto', text: 'Auto-approved (< $2,000)', color: 'bg-success/10 text-success' };
-    if (numAmount < 10000) return { level: 'single', text: '1 Manager Approval Required', color: 'bg-warning/10 text-warning' };
-    return { level: 'dual', text: '2 Approvals Required (≥ $10,000)', color: 'bg-finance-accent/10 text-finance-accent' };
+    if (numAmount < 1) return { level: 'invalid', text: 'Amount must be at least $1', color: 'bg-red-100 text-red-800' };
+    if (numAmount < 2000) return { level: 'auto', text: 'Auto-approved (< $2,000)', color: 'bg-green-100 text-green-800' };
+    if (numAmount < 10000) return { level: 'single', text: '1 Manager Approval Required', color: 'bg-yellow-100 text-yellow-800' };
+    return { level: 'dual', text: '2 Approvals Required (≥ $10,000)', color: 'bg-red-100 text-red-800' };
   };
 
   return (
@@ -195,7 +198,8 @@ export const PaymentRequestForm = () => {
                   <Input 
                     id="amount" 
                     type="number" 
-                    placeholder="0.00" 
+                    placeholder="1.00" 
+                    min="1"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     className="flex-1"
@@ -211,7 +215,7 @@ export const PaymentRequestForm = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="category">Category *</Label>
-                <Select>
+                <Select onValueChange={setSelectedCategory}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
@@ -223,25 +227,33 @@ export const PaymentRequestForm = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedCategory === 'other' && (
+                  <div className="mt-2">
+                    <Label htmlFor="customCategory">Specify Category *</Label>
+                    <Input
+                      id="customCategory"
+                      placeholder="Enter custom category"
+                      value={customCategory}
+                      onChange={(e) => setCustomCategory(e.target.value)}
+                    />
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="expectedDate">Expected Payment Date</Label>
                 <Input id="expectedDate" type="date" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="priority">Priority *</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select priority" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {priorities.map(priority => (
-                      <SelectItem key={priority.value} value={priority.value}>
-                        {priority.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="priority">Priority (Auto-assigned)</Label>
+                <div className="p-3 border rounded-md bg-gray-50">
+                  {amount && parseFloat(amount) >= 1 ? (
+                    <Badge className={getPriority(parseFloat(amount)).color}>
+                      {getPriority(parseFloat(amount)).label}
+                    </Badge>
+                  ) : (
+                    <span className="text-muted-foreground">Enter amount to see priority</span>
+                  )}
+                </div>
               </div>
             </div>
 

@@ -1,9 +1,11 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoginPage } from './components/Auth/LoginPage';
+import { LandingPage } from './pages/LandingPage';
 import { MaterialLayout } from './components/Layout/MaterialLayout';
 import { MaterialDashboard } from './components/Dashboard/MaterialDashboard';
 import { MaterialPaymentForm } from './components/Forms/MaterialPaymentForm';
+import { MyRequestsDashboard } from './components/Dashboard/MyRequestsDashboard';
 import { ApprovalsDashboard } from './components/Dashboard/ApprovalsDashboard';
 import { AllRequestsDashboard } from './components/Dashboard/AllRequestsDashboard';
 import { ReportsDashboard } from './components/Dashboard/ReportsDashboard';
@@ -25,8 +27,9 @@ const AppRoutes = () => {
   if (!isAuthenticated) {
     return (
       <Routes>
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
   }
@@ -36,7 +39,7 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/dashboard" element={<MaterialDashboard />} />
         <Route path="/new-request" element={<MaterialPaymentForm />} />
-        <Route path="/my-requests" element={<div>My Requests Page</div>} />
+        <Route path="/my-requests" element={<MyRequestsDashboard />} />
         <Route path="/approvals" element={<ApprovalsDashboard />} />
         <Route path="/all-requests" element={<AllRequestsDashboard />} />
         <Route path="/reports" element={<ReportsDashboard />} />

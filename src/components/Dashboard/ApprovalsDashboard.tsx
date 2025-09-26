@@ -38,6 +38,7 @@ import {
   ExpandMore,
   ExpandLess
 } from '@mui/icons-material';
+import { RequestReviewModal } from './RequestReviewModal';
 
 interface PaymentRequest {
   id: string;
@@ -109,6 +110,7 @@ export const ApprovalsDashboard: React.FC = () => {
   const [actionType, setActionType] = useState<'approve' | 'reject'>('approve');
   const [comment, setComment] = useState('');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -127,9 +129,18 @@ export const ApprovalsDashboard: React.FC = () => {
   };
 
   const handleAction = (request: PaymentRequest, action: 'approve' | 'reject') => {
+    // Auto-approved requests cannot be manually approved
+    if (request.amount < 2000 && action === 'approve') {
+      return;
+    }
     setSelectedRequest(request);
     setActionType(action);
     setDialogOpen(true);
+  };
+
+  const handleViewRequest = (request: PaymentRequest) => {
+    setSelectedRequest(request);
+    setReviewModalOpen(true);
   };
 
   const confirmAction = () => {
@@ -317,8 +328,9 @@ export const ApprovalsDashboard: React.FC = () => {
                               color="success"
                               variant="contained"
                               onClick={() => handleAction(request, 'approve')}
+                              disabled={request.amount < 2000}
                             >
-                              Approve
+                              {request.amount < 2000 ? 'Auto-approved' : 'Approve'}
                             </Button>
                             <Button
                               size="small"
@@ -331,7 +343,11 @@ export const ApprovalsDashboard: React.FC = () => {
                             </Button>
                           </>
                         )}
-                        <IconButton size="small" color="primary">
+                        <IconButton 
+                          size="small" 
+                          color="primary"
+                          onClick={() => handleViewRequest(request)}
+                        >
                           <Visibility />
                         </IconButton>
                       </Stack>
@@ -389,9 +405,14 @@ export const ApprovalsDashboard: React.FC = () => {
           <Typography variant="body2" sx={{ mb: 2 }}>
             Request ID: {selectedRequest?.id}
           </Typography>
-          <Typography variant="body2" sx={{ mb: 3 }}>
+          <Typography variant="body2" sx={{ mb: 2 }}>
             Amount: {selectedRequest?.currency} {selectedRequest?.amount.toLocaleString()}
           </Typography>
+          {selectedRequest && selectedRequest.amount >= 10000 && actionType === 'approve' && (
+            <Typography variant="body2" sx={{ mb: 3, color: 'warning.main' }}>
+              Note: This request requires dual approval (≥ $10,000)
+            </Typography>
+          )}
           <TextField
             label="Comment (Required)"
             multiline
@@ -414,6 +435,13 @@ export const ApprovalsDashboard: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Request Review Modal */}
+      <RequestReviewModal
+        open={reviewModalOpen}
+        onClose={() => setReviewModalOpen(false)}
+        request={selectedRequest}
+      />
     </Box>
   );
 };

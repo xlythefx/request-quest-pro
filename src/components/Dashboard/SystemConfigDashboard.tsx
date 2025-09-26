@@ -327,15 +327,6 @@ export const SystemConfigDashboard: React.FC = () => {
                 <FormControlLabel
                   control={
                     <Switch
-                      checked={config.smsNotifications}
-                      onChange={(e) => updateConfig('smsNotifications', e.target.checked)}
-                    />
-                  }
-                  label="Enable SMS notifications"
-                />
-                <FormControlLabel
-                  control={
-                    <Switch
                       checked={config.approvalReminders}
                       onChange={(e) => updateConfig('approvalReminders', e.target.checked)}
                     />
@@ -400,7 +391,7 @@ export const SystemConfigDashboard: React.FC = () => {
                       onChange={(e) => updateConfig('auditLogging', e.target.checked)}
                     />
                   }
-                  label="Enable audit logging"
+                  label="Enable audit logging within web app"
                 />
               </Stack>
             </Stack>

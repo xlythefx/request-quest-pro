@@ -305,29 +305,6 @@ export const ReportsDashboard: React.FC = () => {
           </Card>
         </Stack>
 
-        {/* Department Spending Trends */}
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-              Department Spending Trends
-            </Typography>
-            <Box sx={{ height: 350 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={departmentSpendingData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="department" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="Q1" stroke="#1976d2" strokeWidth={2} />
-                  <Line type="monotone" dataKey="Q2" stroke="#388e3c" strokeWidth={2} />
-                  <Line type="monotone" dataKey="Q3" stroke="#f57c00" strokeWidth={2} />
-                  <Line type="monotone" dataKey="Q4" stroke="#d32f2f" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </Box>
-          </CardContent>
-        </Card>
       </Stack>
     </Box>
   );
