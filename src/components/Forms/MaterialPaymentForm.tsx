@@ -6,14 +6,14 @@ import {
   Typography,
   TextField,
   Button,
-  Grid,
   MenuItem,
   InputAdornment,
   Alert,
   Paper,
   IconButton,
   LinearProgress,
-  Chip
+  Chip,
+  Stack
 } from '@mui/material';
 import {
   AttachFile,
@@ -235,291 +235,275 @@ export const MaterialPaymentForm: React.FC = () => {
       </Typography>
 
       <form onSubmit={handleSubmit}>
-        <Grid container spacing={3}>
+        <Stack spacing={3}>
           {/* Contact Information */}
-          <Grid xs={12}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <Person sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="h6" fontWeight="bold">
-                    Contact Information
-                  </Typography>
-                </Box>
-                <Grid container spacing={3}>
-                  <Grid xs={12} md={4}>
-                    <TextField
-                      fullWidth
-                      label="Contact Name"
-                      value={formData.contactName}
-                      onChange={handleInputChange('contactName')}
-                      error={!!errors.contactName}
-                      helperText={errors.contactName}
-                      required
-                    />
-                  </Grid>
-                  <Grid xs={12} md={4}>
-                    <TextField
-                      fullWidth
-                      label="Contact Email"
-                      type="email"
-                      value={formData.contactEmail}
-                      onChange={handleInputChange('contactEmail')}
-                      error={!!errors.contactEmail}
-                      helperText={errors.contactEmail}
-                      required
-                    />
-                  </Grid>
-                  <Grid xs={12} md={4}>
-                    <TextField
-                      fullWidth
-                      label="Contact Phone"
-                      value={formData.contactPhone}
-                      onChange={handleInputChange('contactPhone')}
-                    />
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Person sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h6" fontWeight="bold">
+                  Contact Information
+                </Typography>
+              </Box>
+              <Box sx={{ 
+                display: 'grid', 
+                gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, 
+                gap: 3 
+              }}>
+                <TextField
+                  fullWidth
+                  label="Contact Name"
+                  value={formData.contactName}
+                  onChange={handleInputChange('contactName')}
+                  error={!!errors.contactName}
+                  helperText={errors.contactName}
+                  required
+                />
+                <TextField
+                  fullWidth
+                  label="Contact Email"
+                  type="email"
+                  value={formData.contactEmail}
+                  onChange={handleInputChange('contactEmail')}
+                  error={!!errors.contactEmail}
+                  helperText={errors.contactEmail}
+                  required
+                />
+                <TextField
+                  fullWidth
+                  label="Contact Phone"
+                  value={formData.contactPhone}
+                  onChange={handleInputChange('contactPhone')}
+                />
+              </Box>
+            </CardContent>
+          </Card>
 
           {/* Vendor Information */}
-          <Grid xs={12}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <Business sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="h6" fontWeight="bold">
-                    Vendor Information
-                  </Typography>
-                </Box>
-                <Grid container spacing={3}>
-                  <Grid xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      label="Vendor/Company Name"
-                      value={formData.vendorName}
-                      onChange={handleInputChange('vendorName')}
-                      error={!!errors.vendorName}
-                      helperText={errors.vendorName}
-                      required
-                    />
-                  </Grid>
-                  <Grid xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      label="Vendor Address"
-                      value={formData.vendorAddress}
-                      onChange={handleInputChange('vendorAddress')}
-                      multiline
-                      rows={2}
-                    />
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Business sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h6" fontWeight="bold">
+                  Vendor Information
+                </Typography>
+              </Box>
+              <Box sx={{ 
+                display: 'grid', 
+                gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
+                gap: 3 
+              }}>
+                <TextField
+                  fullWidth
+                  label="Vendor/Company Name"
+                  value={formData.vendorName}
+                  onChange={handleInputChange('vendorName')}
+                  error={!!errors.vendorName}
+                  helperText={errors.vendorName}
+                  required
+                />
+                <TextField
+                  fullWidth
+                  label="Vendor Address"
+                  value={formData.vendorAddress}
+                  onChange={handleInputChange('vendorAddress')}
+                  multiline
+                  rows={2}
+                />
+              </Box>
+            </CardContent>
+          </Card>
 
           {/* Payment Details */}
-          <Grid xs={12}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <AttachMoney sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="h6" fontWeight="bold">
-                    Payment Details
-                  </Typography>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <AttachMoney sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h6" fontWeight="bold">
+                  Payment Details
+                </Typography>
+              </Box>
+              <Stack spacing={3}>
+                <Box sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, 
+                  gap: 3 
+                }}>
+                  <TextField
+                    fullWidth
+                    label="Amount"
+                    type="number"
+                    value={formData.amount}
+                    onChange={handleInputChange('amount')}
+                    error={!!errors.amount}
+                    helperText={errors.amount}
+                    required
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          {currencies.find(c => c.value === formData.currency)?.label.slice(-3, -1) || '$'}
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    select
+                    label="Currency"
+                    value={formData.currency}
+                    onChange={handleInputChange('currency')}
+                  >
+                    {currencies.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
                 </Box>
-                <Grid container spacing={3}>
-                  <Grid xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      label="Amount"
-                      type="number"
-                      value={formData.amount}
-                      onChange={handleInputChange('amount')}
-                      error={!!errors.amount}
-                      helperText={errors.amount}
-                      required
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            {currencies.find(c => c.value === formData.currency)?.label.slice(-3, -1) || '$'}
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  <Grid xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      select
-                      label="Currency"
-                      value={formData.currency}
-                      onChange={handleInputChange('currency')}
-                    >
-                      {currencies.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </Grid>
-                  <Grid xs={12}>
-                    <TextField
-                      fullWidth
-                      label="Subject/Title"
-                      value={formData.subject}
-                      onChange={handleInputChange('subject')}
-                      error={!!errors.subject}
-                      helperText={errors.subject}
-                      required
-                    />
-                  </Grid>
-                  <Grid xs={12}>
-                    <TextField
-                      fullWidth
-                      label="Description"
-                      multiline
-                      rows={4}
-                      value={formData.description}
-                      onChange={handleInputChange('description')}
-                      placeholder="Provide detailed information about this payment request..."
-                    />
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
+                <TextField
+                  fullWidth
+                  label="Subject/Title"
+                  value={formData.subject}
+                  onChange={handleInputChange('subject')}
+                  error={!!errors.subject}
+                  helperText={errors.subject}
+                  required
+                />
+                <TextField
+                  fullWidth
+                  label="Description"
+                  multiline
+                  rows={4}
+                  value={formData.description}
+                  onChange={handleInputChange('description')}
+                  placeholder="Provide detailed information about this payment request..."
+                />
+              </Stack>
+            </CardContent>
+          </Card>
 
           {/* Classification */}
-          <Grid xs={12}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <Category sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="h6" fontWeight="bold">
-                    Classification & Priority
-                  </Typography>
-                </Box>
-                <Grid container spacing={3}>
-                  <Grid xs={12} md={3}>
-                    <TextField
-                      fullWidth
-                      select
-                      label="Category"
-                      value={formData.category}
-                      onChange={handleInputChange('category')}
-                      error={!!errors.category}
-                      helperText={errors.category}
-                      required
-                    >
-                      {categories.map((option) => (
-                        <MenuItem key={option} value={option}>
-                          {option}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </Grid>
-                  <Grid xs={12} md={3}>
-                    <TextField
-                      fullWidth
-                      select
-                      label="Department"
-                      value={formData.department}
-                      onChange={handleInputChange('department')}
-                      error={!!errors.department}
-                      helperText={errors.department}
-                      required
-                    >
-                      {departments.map((option) => (
-                        <MenuItem key={option} value={option}>
-                          {option}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </Grid>
-                  <Grid xs={12} md={3}>
-                    <TextField
-                      fullWidth
-                      type="date"
-                      label="Expected Date"
-                      value={formData.expectedDate}
-                      onChange={handleInputChange('expectedDate')}
-                      error={!!errors.expectedDate}
-                      helperText={errors.expectedDate}
-                      required
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
-                    />
-                  </Grid>
-                  <Grid xs={12} md={3}>
-                    <TextField
-                      fullWidth
-                      select
-                      label="Priority"
-                      value={formData.priority}
-                      onChange={handleInputChange('priority')}
-                    >
-                      {priorities.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Flag sx={{ color: option.color, fontSize: 16 }} />
-                            {option.label}
-                          </Box>
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Category sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h6" fontWeight="bold">
+                  Classification & Priority
+                </Typography>
+              </Box>
+              <Box sx={{ 
+                display: 'grid', 
+                gridTemplateColumns: { xs: '1fr', md: 'repeat(4, 1fr)' }, 
+                gap: 3 
+              }}>
+                <TextField
+                  fullWidth
+                  select
+                  label="Category"
+                  value={formData.category}
+                  onChange={handleInputChange('category')}
+                  error={!!errors.category}
+                  helperText={errors.category}
+                  required
+                >
+                  {categories.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  fullWidth
+                  select
+                  label="Department"
+                  value={formData.department}
+                  onChange={handleInputChange('department')}
+                  error={!!errors.department}
+                  helperText={errors.department}
+                  required
+                >
+                  {departments.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  fullWidth
+                  type="date"
+                  label="Expected Date"
+                  value={formData.expectedDate}
+                  onChange={handleInputChange('expectedDate')}
+                  error={!!errors.expectedDate}
+                  helperText={errors.expectedDate}
+                  required
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+                <TextField
+                  fullWidth
+                  select
+                  label="Priority"
+                  value={formData.priority}
+                  onChange={handleInputChange('priority')}
+                >
+                  {priorities.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Flag sx={{ color: option.color, fontSize: 16 }} />
+                        {option.label}
+                      </Box>
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Box>
+            </CardContent>
+          </Card>
 
           {/* File Upload */}
-          <Grid xs={12}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <AttachFile sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="h6" fontWeight="bold">
-                    Supporting Documents
-                  </Typography>
-                </Box>
-                
-                <Paper
-                  {...getRootProps()}
-                  sx={{
-                    p: 3,
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    border: 2,
-                    borderStyle: 'dashed',
-                    borderColor: isDragActive ? 'primary.main' : 'grey.300',
-                    bgcolor: isDragActive ? 'primary.light' : 'grey.50',
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      borderColor: 'primary.main',
-                      bgcolor: 'primary.light'
-                    }
-                  }}
-                >
-                  <input {...getInputProps()} />
-                  <CloudUpload sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-                  <Typography variant="h6" gutterBottom>
-                    {isDragActive ? 'Drop files here' : 'Drag & drop files here, or click to select'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Supported formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB each)
-                  </Typography>
-                </Paper>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <AttachFile sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h6" fontWeight="bold">
+                  Supporting Documents
+                </Typography>
+              </Box>
+              
+              <Paper
+                {...getRootProps()}
+                sx={{
+                  p: 3,
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  border: 2,
+                  borderStyle: 'dashed',
+                  borderColor: isDragActive ? 'primary.main' : 'grey.300',
+                  bgcolor: isDragActive ? 'primary.light' : 'grey.50',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    borderColor: 'primary.main',
+                    bgcolor: 'primary.light'
+                  }
+                }}
+              >
+                <input {...getInputProps()} />
+                <CloudUpload sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+                <Typography variant="h6" gutterBottom>
+                  {isDragActive ? 'Drop files here' : 'Drag & drop files here, or click to select'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Supported formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB each)
+                </Typography>
+              </Paper>
 
-                {files.length > 0 && (
-                  <Box sx={{ mt: 3 }}>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Uploaded Files ({files.length})
-                    </Typography>
+              {files.length > 0 && (
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Uploaded Files ({files.length})
+                  </Typography>
+                  <Stack spacing={1}>
                     {files.map((file, index) => (
                       <Box
                         key={index}
@@ -530,8 +514,7 @@ export const MaterialPaymentForm: React.FC = () => {
                           p: 2,
                           border: 1,
                           borderColor: 'grey.200',
-                          borderRadius: 1,
-                          mb: 1
+                          borderRadius: 1
                         }}
                       >
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -554,48 +537,46 @@ export const MaterialPaymentForm: React.FC = () => {
                         </IconButton>
                       </Box>
                     ))}
-                  </Box>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
+                  </Stack>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Submit Button */}
-          <Grid xs={12}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box>
-                    <Typography variant="h6" gutterBottom>
-                      Submit Request
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Review your information and submit the payment request for approval.
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', gap: 2 }}>
-                    <Button
-                      variant="outlined"
-                      size="large"
-                      disabled={loading}
-                    >
-                      Save as Draft
-                    </Button>
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      size="large"
-                      disabled={loading}
-                      sx={{ minWidth: 150 }}
-                    >
-                      {loading ? <LinearProgress /> : 'Submit Request'}
-                    </Button>
-                  </Box>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box>
+                  <Typography variant="h6" gutterBottom>
+                    Submit Request
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Review your information and submit the payment request for approval.
+                  </Typography>
                 </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    disabled={loading}
+                  >
+                    Save as Draft
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    size="large"
+                    disabled={loading}
+                    sx={{ minWidth: 150 }}
+                  >
+                    {loading ? <LinearProgress /> : 'Submit Request'}
+                  </Button>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Stack>
       </form>
     </Box>
   );
