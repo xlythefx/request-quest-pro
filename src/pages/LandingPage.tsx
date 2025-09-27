@@ -57,7 +57,7 @@ export const LandingPage = () => {
       icon: <Shield className="h-8 w-8" />,
       title: "Enterprise Security",
       description: "Bank-grade security with role-based access and audit trails",
-      gradient: "from-accent to-accent/80"
+      gradient: "from-red-500 to-red-400"
     },
     {
       icon: <Clock className="h-8 w-8" />,
@@ -83,10 +83,10 @@ export const LandingPage = () => {
   ];
 
   const stats = [
-    { value: "70%", label: "Faster Approvals", icon: <TrendingUp className="h-6 w-6" /> },
-    { value: "500+", label: "Happy Customers", icon: <Users className="h-6 w-6" /> },
-    { value: "99.9%", label: "Uptime", icon: <Shield className="h-6 w-6" /> },
-    { value: "24/7", label: "Support", icon: <Globe className="h-6 w-6" /> }
+    { value: "60%", label: "Faster Payment Processing", icon: <TrendingUp className="h-6 w-6" /> },
+    { value: "Internal", label: "Feature Digital Use", icon: <Users className="h-6 w-6" /> },
+    { value: "99.9%", label: "System Uptime", icon: <Shield className="h-6 w-6" /> },
+    { value: "24/7", label: "Internal Support", icon: <Globe className="h-6 w-6" /> }
   ];
 
   return (
@@ -107,7 +107,7 @@ export const LandingPage = () => {
               <div className="p-2 bg-gradient-to-br from-primary to-secondary rounded-xl">
                 <DollarSign className="h-8 w-8 text-white" />
               </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 Feature Digital LTD
               </span>
             </div>
@@ -217,8 +217,8 @@ export const LandingPage = () => {
                 Why Companies Choose Feature Digital LTD
               </h2>
               <p className="text-xl text-muted-foreground mb-10 leading-relaxed">
-                Join hundreds of organizations that have transformed their finance operations 
-                with our comprehensive platform.
+                Our internal finance management system has transformed Feature Digital's operations 
+                with comprehensive workflow automation and real-time tracking.
               </p>
               <div className="space-y-6">
                 {benefits.map((benefit, index) => (
@@ -272,8 +272,8 @@ export const LandingPage = () => {
       <section id="stats" className="py-20 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16" data-aos="fade-up">
-            <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">Proven Results</h2>
-            <p className="text-xl text-muted-foreground">Numbers that speak for our excellence</p>
+            <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">Internal Performance Metrics</h2>
+            <p className="text-xl text-muted-foreground">Feature Digital's finance system results</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (

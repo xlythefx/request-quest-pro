@@ -9,13 +9,13 @@
   :root {
     /* Core Colors - Brand Finance Theme */
     --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    --foreground: 20 14% 4%; /* #121212 instead of sharp black */
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card-foreground: 20 14% 4%; /* #121212 instead of sharp black */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    --popover-foreground: 20 14% 4%; /* #121212 instead of sharp black */
 
     /* Primary - Teal Green */
     --primary: 171 42% 56%;
