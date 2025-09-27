@@ -83,7 +83,7 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
                 <DollarSign className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="font-semibold text-lg">FinanceFlow</h1>
+                <h1 className="font-semibold text-lg text-yellow-600">Feature Digital LTD</h1>
                 <p className="text-sm text-muted-foreground capitalize">{userRole} Portal</p>
               </div>
             </div>
@@ -95,12 +95,12 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
               <Button
                 key={index}
                 variant={item.active ? "default" : "ghost"}
-                className="w-full justify-start h-11"
+                className="w-full justify-start h-11 transition-all duration-300 hover:bg-yellow-50 hover:border-yellow-200 hover:shadow-md hover:scale-105 group"
               >
-                <item.icon className="h-5 w-5 mr-3" />
-                <span className="flex-1 text-left">{item.label}</span>
+                <item.icon className="h-5 w-5 mr-3 transition-all duration-300 group-hover:text-yellow-600 group-hover:scale-110" />
+                <span className="flex-1 text-left transition-all duration-300 group-hover:text-yellow-700">{item.label}</span>
                 {item.badge && (
-                  <Badge variant={item.active ? "secondary" : "default"} className="ml-auto">
+                  <Badge variant={item.active ? "secondary" : "default"} className="ml-auto transition-all duration-300 group-hover:bg-yellow-100 group-hover:text-yellow-800">
                     {item.badge}
                   </Badge>
                 )}
