@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Card,
@@ -16,17 +16,17 @@ import {
   Stack
 } from '@mui/material';
 import {
-  Upload,
-  Trash2,
-  User,
-  Building,
-  DollarSign,
-  FolderOpen,
-  Calendar,
+  AttachFile,
+  Delete,
+  CloudUpload,
+  Person,
+  Business,
+  AttachMoney,
+  Category,
+  CalendarToday,
   Flag
-} from 'lucide-react';
+} from '@mui/icons-material';
 import { useDropzone } from 'react-dropzone';
-import AOS from 'aos';
 
 interface PaymentFormData {
   contactName: string;
@@ -83,13 +83,6 @@ const priorities = [
 ];
 
 export const MaterialPaymentForm: React.FC = () => {
-  useEffect(() => {
-    AOS.init({
-      duration: 800,
-      easing: 'ease-out-cubic'
-    });
-  }, []);
-
   const [formData, setFormData] = useState<PaymentFormData>({
     contactName: '',
     contactEmail: '',
@@ -233,49 +226,22 @@ export const MaterialPaymentForm: React.FC = () => {
   }
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%)',
-      position: 'relative',
-      '&::before': {
-        content: '""',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'radial-gradient(circle at 20% 50%, rgba(251, 191, 36, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(254, 243, 199, 0.4) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(251, 191, 36, 0.2) 0%, transparent 50%)',
-        animation: 'float 6s ease-in-out infinite',
-        zIndex: 0
-      }
-    }}>
-      <Box sx={{ position: 'relative', zIndex: 1, p: 3 }}>
-        <Box data-aos="fade-down" sx={{ mb: 4 }}>
-          <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ color: '#d97706' }}>
-            Create Payment Request
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Fill out the form below to submit a new payment request for approval.
-          </Typography>
-        </Box>
+    <Box>
+      <Typography variant="h4" fontWeight="bold" gutterBottom>
+        Create Payment Request
+      </Typography>
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+        Fill out the form below to submit a new payment request for approval.
+      </Typography>
 
       <form onSubmit={handleSubmit}>
         <Stack spacing={3}>
           {/* Contact Information */}
-          <Card 
-            data-aos="fade-up" 
-            data-aos-delay="100"
-            sx={{ 
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(251, 191, 36, 0.2)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-            }}
-          >
+          <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <User size={20} style={{ marginRight: 8, color: '#d97706' }} />
-                <Typography variant="h6" fontWeight="bold" sx={{ color: '#d97706' }}>
+                <Person sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h6" fontWeight="bold">
                   Contact Information
                 </Typography>
               </Box>
@@ -314,20 +280,11 @@ export const MaterialPaymentForm: React.FC = () => {
           </Card>
 
           {/* Vendor Information */}
-          <Card 
-            data-aos="fade-up" 
-            data-aos-delay="200"
-            sx={{ 
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(251, 191, 36, 0.2)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-            }}
-          >
+          <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <Building size={20} style={{ marginRight: 8, color: '#d97706' }} />
-                <Typography variant="h6" fontWeight="bold" sx={{ color: '#d97706' }}>
+                <Business sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h6" fontWeight="bold">
                   Vendor Information
                 </Typography>
               </Box>
@@ -358,20 +315,11 @@ export const MaterialPaymentForm: React.FC = () => {
           </Card>
 
           {/* Payment Details */}
-          <Card 
-            data-aos="fade-up" 
-            data-aos-delay="300"
-            sx={{ 
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(251, 191, 36, 0.2)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-            }}
-          >
+          <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <DollarSign size={20} style={{ marginRight: 8, color: '#d97706' }} />
-                <Typography variant="h6" fontWeight="bold" sx={{ color: '#d97706' }}>
+                <AttachMoney sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h6" fontWeight="bold">
                   Payment Details
                 </Typography>
               </Box>
@@ -435,20 +383,11 @@ export const MaterialPaymentForm: React.FC = () => {
           </Card>
 
           {/* Classification */}
-          <Card 
-            data-aos="fade-up" 
-            data-aos-delay="400"
-            sx={{ 
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(251, 191, 36, 0.2)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-            }}
-          >
+          <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <FolderOpen size={20} style={{ marginRight: 8, color: '#d97706' }} />
-                <Typography variant="h6" fontWeight="bold" sx={{ color: '#d97706' }}>
+                <Category sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h6" fontWeight="bold">
                   Classification & Priority
                 </Typography>
               </Box>
@@ -511,10 +450,10 @@ export const MaterialPaymentForm: React.FC = () => {
                 >
                   {priorities.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
-                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                         <Flag size={16} style={{ color: option.color }} />
-                         {option.label}
-                       </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Flag sx={{ color: option.color, fontSize: 16 }} />
+                        {option.label}
+                      </Box>
                     </MenuItem>
                   ))}
                 </TextField>
@@ -523,20 +462,11 @@ export const MaterialPaymentForm: React.FC = () => {
           </Card>
 
           {/* File Upload */}
-          <Card 
-            data-aos="fade-up" 
-            data-aos-delay="500"
-            sx={{ 
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(251, 191, 36, 0.2)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-            }}
-          >
+          <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <Upload size={20} style={{ marginRight: 8, color: '#d97706' }} />
-                <Typography variant="h6" fontWeight="bold" sx={{ color: '#d97706' }}>
+                <AttachFile sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h6" fontWeight="bold">
                   Supporting Documents
                 </Typography>
               </Box>
@@ -559,7 +489,7 @@ export const MaterialPaymentForm: React.FC = () => {
                 }}
               >
                 <input {...getInputProps()} />
-                <Upload size={48} style={{ color: '#d97706', marginBottom: 16 }} />
+                <CloudUpload sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
                 <Typography variant="h6" gutterBottom>
                   {isDragActive ? 'Drop files here' : 'Drag & drop files here, or click to select'}
                 </Typography>
@@ -587,9 +517,9 @@ export const MaterialPaymentForm: React.FC = () => {
                           borderRadius: 1
                         }}
                       >
-                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                           <Upload size={16} style={{ color: '#d97706' }} />
-                           <Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <AttachFile color="primary" />
+                          <Box>
                             <Typography variant="body2" fontWeight="medium">
                               {file.name}
                             </Typography>
@@ -598,12 +528,12 @@ export const MaterialPaymentForm: React.FC = () => {
                             </Typography>
                           </Box>
                         </Box>
-                         <IconButton
+                        <IconButton
                           onClick={() => removeFile(index)}
                           color="error"
                           size="small"
                         >
-                          <Trash2 size={16} />
+                          <Delete />
                         </IconButton>
                       </Box>
                     ))}
@@ -614,20 +544,11 @@ export const MaterialPaymentForm: React.FC = () => {
           </Card>
 
           {/* Submit Button */}
-          <Card 
-            data-aos="fade-up" 
-            data-aos-delay="600"
-            sx={{ 
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(251, 191, 36, 0.2)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-            }}
-          >
+          <Card>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box>
-                  <Typography variant="h6" gutterBottom sx={{ color: '#d97706' }}>
+                  <Typography variant="h6" gutterBottom>
                     Submit Request
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -639,14 +560,6 @@ export const MaterialPaymentForm: React.FC = () => {
                     variant="outlined"
                     size="large"
                     disabled={loading}
-                    sx={{ 
-                      borderColor: '#fbbf24',
-                      color: '#d97706',
-                      '&:hover': {
-                        borderColor: '#d97706',
-                        backgroundColor: 'rgba(251, 191, 36, 0.1)'
-                      }
-                    }}
                   >
                     Save as Draft
                   </Button>
@@ -655,13 +568,7 @@ export const MaterialPaymentForm: React.FC = () => {
                     variant="contained"
                     size="large"
                     disabled={loading}
-                    sx={{ 
-                      minWidth: 150,
-                      backgroundColor: '#fbbf24',
-                      '&:hover': {
-                        backgroundColor: '#d97706'
-                      }
-                    }}
+                    sx={{ minWidth: 150 }}
                   >
                     {loading ? <LinearProgress /> : 'Submit Request'}
                   </Button>
@@ -670,8 +577,7 @@ export const MaterialPaymentForm: React.FC = () => {
             </CardContent>
           </Card>
         </Stack>
-        </form>
-      </Box>
+      </form>
     </Box>
   );
 };

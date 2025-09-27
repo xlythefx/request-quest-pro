@@ -1,23 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Database, 
-  HardDrive, 
-  CheckCircle, 
-  AlertTriangle, 
-  XCircle,
-  Download,
-  Upload,
-  Settings,
-  Trash2,
-  RefreshCw
-} from 'lucide-react';
-import AOS from 'aos';
+import React, { useState } from 'react';
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Stack,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  LinearProgress,
+  Alert,
+  Paper,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField
+} from '@mui/material';
+import {
+  Storage,
+  Backup,
+  Restore,
+  Delete,
+  Refresh,
+  Warning,
+  CheckCircle,
+  Error,
+  Settings
+} from '@mui/icons-material';
 
 interface DatabaseTable {
   name: string;
@@ -54,29 +70,21 @@ const mockBackups: BackupRecord[] = [
 ];
 
 export const DatabaseManagementDashboard: React.FC = () => {
+  const [backupDialogOpen, setBackupDialogOpen] = useState(false);
+  const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
+  const [maintenanceDialogOpen, setMaintenanceDialogOpen] = useState(false);
+  const [selectedBackup, setSelectedBackup] = useState<BackupRecord | null>(null);
   const [isPerformingAction, setIsPerformingAction] = useState(false);
-
-  useEffect(() => {
-    AOS.init({
-      duration: 800,
-      easing: 'ease-out-cubic'
-    });
-  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'healthy':
-      case 'completed':
-        return 'default';
-      case 'warning':
-        return 'secondary';
-      case 'error':
-      case 'failed':
-        return 'destructive';
-      case 'in_progress':
-        return 'outline';
-      default:
-        return 'outline';
+      case 'healthy': return 'success';
+      case 'warning': return 'warning';
+      case 'error': return 'error';
+      case 'completed': return 'success';
+      case 'failed': return 'error';
+      case 'in_progress': return 'info';
+      default: return 'default';
     }
   };
 
@@ -84,15 +92,43 @@ export const DatabaseManagementDashboard: React.FC = () => {
     switch (status) {
       case 'healthy':
       case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
+        return <CheckCircle color="success" />;
       case 'warning':
-        return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
+        return <Warning color="warning" />;
       case 'error':
       case 'failed':
-        return <XCircle className="h-4 w-4 text-red-600" />;
+        return <Error color="error" />;
       default:
         return null;
     }
+  };
+
+  const handleBackup = async () => {
+    setIsPerformingAction(true);
+    // Mock backup process
+    setTimeout(() => {
+      setIsPerformingAction(false);
+      setBackupDialogOpen(false);
+    }, 3000);
+  };
+
+  const handleRestore = async () => {
+    setIsPerformingAction(true);
+    // Mock restore process
+    setTimeout(() => {
+      setIsPerformingAction(false);
+      setRestoreDialogOpen(false);
+      setSelectedBackup(null);
+    }, 5000);
+  };
+
+  const handleMaintenance = async () => {
+    setIsPerformingAction(true);
+    // Mock maintenance process
+    setTimeout(() => {
+      setIsPerformingAction(false);
+      setMaintenanceDialogOpen(false);
+    }, 4000);
   };
 
   const totalSize = mockTables.reduce((sum, table) => {
@@ -106,238 +142,385 @@ export const DatabaseManagementDashboard: React.FC = () => {
   const totalRows = mockTables.reduce((sum, table) => sum + table.rows, 0);
 
   return (
-    <div className="min-h-screen finance-bg-animated">
-      <div className="p-6 space-y-6">
-        <div data-aos="fade-down">
-          <h1 className="finance-heading text-yellow-600">Database Management</h1>
-          <p className="text-muted-foreground">Monitor database health, perform backups, and manage system maintenance</p>
-        </div>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
+        Database Management
+      </Typography>
+      
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+        Monitor database health, perform backups, and manage system maintenance
+      </Typography>
 
-        {/* Database Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6" data-aos="fade-up" data-aos-delay="100">
-          <Card className="finance-card">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <Database className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {(totalSize / 1024).toFixed(1)} GB
-                  </p>
-                  <p className="text-sm text-muted-foreground">Total Database Size</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="finance-card">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-green-600">
-                    {healthyTables}/{mockTables.length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Healthy Tables</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="finance-card">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-purple-100 rounded-lg">
-                  <HardDrive className="h-6 w-6 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-purple-600">
-                    {totalRows.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Total Records</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="finance-card">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-yellow-100 rounded-lg">
-                  <Upload className="h-6 w-6 text-yellow-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-yellow-600">
-                    {mockBackups.filter(b => b.status === 'completed').length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Successful Backups</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* System Health Alert */}
-        <Alert data-aos="fade-up" data-aos-delay="200" className="border-yellow-200 bg-yellow-50">
-          <AlertTriangle className="h-4 w-4 text-yellow-600" />
-          <AlertDescription className="text-yellow-800">
-            <strong>System Notice:</strong> The 'documents' table is showing storage errors. 
-            Consider running maintenance or archiving old files.
-          </AlertDescription>
-        </Alert>
-
-        {/* Action Buttons */}
-        <Card data-aos="fade-up" data-aos-delay="300">
-          <CardContent className="p-6">
-            <div className="flex flex-wrap gap-4">
-              <Button 
-                className="finance-button-primary"
-                disabled={isPerformingAction}
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Create Backup
-              </Button>
-              <Button 
-                variant="outline" 
-                className="border-yellow-200 text-yellow-700 hover:bg-yellow-50"
-                disabled={isPerformingAction}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Restore Database
-              </Button>
-              <Button 
-                variant="outline"
-                disabled={isPerformingAction}
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Run Maintenance
-              </Button>
-              <Button 
-                variant="outline"
-                disabled={isPerformingAction}
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh Stats
-              </Button>
-            </div>
+      {/* Database Overview */}
+      <Stack direction="row" spacing={3} sx={{ mb: 4 }}>
+        <Card sx={{ flex: 1 }}>
+          <CardContent>
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Box sx={{ 
+                p: 1.5, 
+                borderRadius: 2, 
+                bgcolor: 'primary.light',
+                color: 'primary.contrastText'
+              }}>
+                <Storage />
+              </Box>
+              <Box>
+                <Typography variant="h5" fontWeight={600}>
+                  {(totalSize / 1024).toFixed(1)} GB
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Total Database Size
+                </Typography>
+              </Box>
+            </Stack>
           </CardContent>
         </Card>
 
-        <div className="space-y-6">
-          {/* Database Tables */}
-          <Card data-aos="fade-up" data-aos-delay="400">
-            <CardHeader>
-              <CardTitle className="text-yellow-600">Database Tables</CardTitle>
-              <CardDescription>Overview of all database tables and their current status</CardDescription>
-            </CardHeader>
-            <CardContent>
+        <Card sx={{ flex: 1 }}>
+          <CardContent>
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Box sx={{ 
+                p: 1.5, 
+                borderRadius: 2, 
+                bgcolor: 'success.light',
+                color: 'success.contrastText'
+              }}>
+                <CheckCircle />
+              </Box>
+              <Box>
+                <Typography variant="h5" fontWeight={600}>
+                  {healthyTables}/{mockTables.length}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Healthy Tables
+                </Typography>
+              </Box>
+            </Stack>
+          </CardContent>
+        </Card>
+
+        <Card sx={{ flex: 1 }}>
+          <CardContent>
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Box sx={{ 
+                p: 1.5, 
+                borderRadius: 2, 
+                bgcolor: 'info.light',
+                color: 'info.contrastText'
+              }}>
+                <Storage />
+              </Box>
+              <Box>
+                <Typography variant="h5" fontWeight={600}>
+                  {totalRows.toLocaleString()}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Total Records
+                </Typography>
+              </Box>
+            </Stack>
+          </CardContent>
+        </Card>
+
+        <Card sx={{ flex: 1 }}>
+          <CardContent>
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Box sx={{ 
+                p: 1.5, 
+                borderRadius: 2, 
+                bgcolor: 'warning.light',
+                color: 'warning.contrastText'
+              }}>
+                <Backup />
+              </Box>
+              <Box>
+                <Typography variant="h5" fontWeight={600}>
+                  {mockBackups.filter(b => b.status === 'completed').length}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Successful Backups
+                </Typography>
+              </Box>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Stack>
+
+      {/* System Health Alert */}
+      <Alert severity="warning" sx={{ mb: 3 }}>
+        <Typography variant="body2">
+          <strong>System Notice:</strong> The 'documents' table is showing storage errors. 
+          Consider running maintenance or archiving old files.
+        </Typography>
+      </Alert>
+
+      {/* Action Buttons */}
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <Stack direction="row" spacing={2}>
+          <Button
+            variant="contained"
+            startIcon={<Backup />}
+            onClick={() => setBackupDialogOpen(true)}
+            disabled={isPerformingAction}
+          >
+            Create Backup
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<Restore />}
+            onClick={() => setRestoreDialogOpen(true)}
+            disabled={isPerformingAction}
+          >
+            Restore Database
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<Settings />}
+            onClick={() => setMaintenanceDialogOpen(true)}
+            disabled={isPerformingAction}
+          >
+            Run Maintenance
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<Refresh />}
+            disabled={isPerformingAction}
+          >
+            Refresh Stats
+          </Button>
+        </Stack>
+      </Paper>
+
+      <Stack spacing={3}>
+        {/* Database Tables */}
+        <Card>
+          <CardContent>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              Database Tables
+            </Typography>
+            <TableContainer>
               <Table>
-                <TableHeader>
+                <TableHead>
                   <TableRow>
-                    <TableHead>Table Name</TableHead>
-                    <TableHead>Rows</TableHead>
-                    <TableHead>Size</TableHead>
-                    <TableHead>Last Updated</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableCell sx={{ fontWeight: 600 }}>Table Name</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Rows</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Size</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Last Updated</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
                   </TableRow>
-                </TableHeader>
+                </TableHead>
                 <TableBody>
                   {mockTables.map((table) => (
-                    <TableRow key={table.name} className="hover:bg-yellow-50/50">
-                      <TableCell className="font-medium">{table.name}</TableCell>
-                      <TableCell>{table.rows.toLocaleString()}</TableCell>
-                      <TableCell>{table.size}</TableCell>
-                      <TableCell>{table.lastUpdated}</TableCell>
+                    <TableRow key={table.name} hover>
                       <TableCell>
-                        <div className="flex items-center space-x-2">
-                          {getStatusIcon(table.status)}
-                          <Badge variant={getStatusColor(table.status) as any}>
-                            {table.status.toUpperCase()}
-                          </Badge>
-                        </div>
+                        <Typography variant="body2" fontWeight={600}>
+                          {table.name}
+                        </Typography>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <Button size="sm" variant="ghost" className="text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50">
-                            <Settings className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        <Typography variant="body2">
+                          {table.rows.toLocaleString()}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{table.size}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{table.lastUpdated}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          {getStatusIcon(table.status)}
+                          <Chip 
+                            label={table.status.toUpperCase()} 
+                            color={getStatusColor(table.status) as any}
+                            size="small"
+                          />
+                        </Stack>
+                      </TableCell>
+                      <TableCell>
+                        <Stack direction="row" spacing={1}>
+                          <IconButton size="small" color="primary">
+                            <Settings />
+                          </IconButton>
+                          <IconButton size="small" color="error">
+                            <Delete />
+                          </IconButton>
+                        </Stack>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
+            </TableContainer>
+          </CardContent>
+        </Card>
 
-          {/* Backup History */}
-          <Card data-aos="fade-up" data-aos-delay="500">
-            <CardHeader>
-              <CardTitle className="text-yellow-600">Backup History</CardTitle>
-              <CardDescription>Recent database backup records and status</CardDescription>
-            </CardHeader>
-            <CardContent>
+        {/* Backup History */}
+        <Card>
+          <CardContent>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              Backup History
+            </Typography>
+            <TableContainer>
               <Table>
-                <TableHeader>
+                <TableHead>
                   <TableRow>
-                    <TableHead>Backup ID</TableHead>
-                    <TableHead>Date & Time</TableHead>
-                    <TableHead>Size</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableCell sx={{ fontWeight: 600 }}>Backup ID</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Date & Time</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Size</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
                   </TableRow>
-                </TableHeader>
+                </TableHead>
                 <TableBody>
                   {mockBackups.map((backup) => (
-                    <TableRow key={backup.id} className="hover:bg-yellow-50/50">
-                      <TableCell className="font-medium">{backup.id}</TableCell>
-                      <TableCell>{backup.date}</TableCell>
-                      <TableCell>{backup.size}</TableCell>
+                    <TableRow key={backup.id} hover>
                       <TableCell>
-                        <Badge variant={backup.type === 'full' ? 'default' : 'secondary'}>
-                          {backup.type.toUpperCase()}
-                        </Badge>
+                        <Typography variant="body2" fontWeight={600}>
+                          {backup.id}
+                        </Typography>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center space-x-2">
+                        <Typography variant="body2">{backup.date}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{backup.size}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={backup.type.toUpperCase()} 
+                          color={backup.type === 'full' ? 'primary' : 'secondary'}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Stack direction="row" alignItems="center" spacing={1}>
                           {getStatusIcon(backup.status)}
-                          <Badge variant={getStatusColor(backup.status) as any}>
-                            {backup.status.replace('_', ' ').toUpperCase()}
-                          </Badge>
-                        </div>
+                          <Chip 
+                            label={backup.status.replace('_', ' ').toUpperCase()} 
+                            color={getStatusColor(backup.status) as any}
+                            size="small"
+                          />
+                        </Stack>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center space-x-2">
+                        <Stack direction="row" spacing={1}>
                           <Button
-                            size="sm"
-                            variant="outline"
+                            size="small"
+                            variant="outlined"
+                            onClick={() => {
+                              setSelectedBackup(backup);
+                              setRestoreDialogOpen(true);
+                            }}
                             disabled={backup.status !== 'completed'}
-                            className="border-yellow-200 text-yellow-700 hover:bg-yellow-50"
                           >
-                            <Download className="h-4 w-4 mr-1" />
                             Restore
                           </Button>
-                          <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                          <IconButton size="small" color="error">
+                            <Delete />
+                          </IconButton>
+                        </Stack>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
+            </TableContainer>
+          </CardContent>
+        </Card>
+      </Stack>
+
+      {/* Backup Dialog */}
+      <Dialog open={backupDialogOpen} onClose={() => setBackupDialogOpen(false)}>
+        <DialogTitle>Create Database Backup</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            This will create a full backup of the entire database. The process may take several minutes.
+          </Typography>
+          {isPerformingAction && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" sx={{ mb: 1 }}>Creating backup...</Typography>
+              <LinearProgress />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setBackupDialogOpen(false)} disabled={isPerformingAction}>
+            Cancel
+          </Button>
+          <Button onClick={handleBackup} variant="contained" disabled={isPerformingAction}>
+            Create Backup
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Restore Dialog */}
+      <Dialog open={restoreDialogOpen} onClose={() => setRestoreDialogOpen(false)}>
+        <DialogTitle>Restore Database</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            {selectedBackup 
+              ? `Restore from backup ${selectedBackup.id} (${selectedBackup.date})?`
+              : 'Select a backup to restore from the table above.'
+            }
+          </Typography>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            This will overwrite all current data. Make sure to create a backup first!
+          </Alert>
+          {isPerformingAction && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" sx={{ mb: 1 }}>Restoring database...</Typography>
+              <LinearProgress />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRestoreDialogOpen(false)} disabled={isPerformingAction}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleRestore} 
+            color="error" 
+            variant="contained" 
+            disabled={!selectedBackup || isPerformingAction}
+          >
+            Restore Database
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Maintenance Dialog */}
+      <Dialog open={maintenanceDialogOpen} onClose={() => setMaintenanceDialogOpen(false)}>
+        <DialogTitle>System Maintenance</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Run database maintenance tasks including:
+          </Typography>
+          <Box component="ul" sx={{ mb: 2 }}>
+            <li>Index optimization</li>
+            <li>Table defragmentation</li>
+            <li>Statistics updates</li>
+            <li>Log file cleanup</li>
+          </Box>
+          {isPerformingAction && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" sx={{ mb: 1 }}>Running maintenance tasks...</Typography>
+              <LinearProgress />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setMaintenanceDialogOpen(false)} disabled={isPerformingAction}>
+            Cancel
+          </Button>
+          <Button onClick={handleMaintenance} variant="contained" disabled={isPerformingAction}>
+            Run Maintenance
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };

@@ -83,7 +83,7 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
                 <DollarSign className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="font-semibold text-sm text-yellow-600">Feature Digital LTD</h1>
+                <h1 className="font-semibold text-lg text-yellow-600">Feature Digital LTD</h1>
                 <p className="text-sm text-muted-foreground capitalize">{userRole} Portal</p>
               </div>
             </div>

@@ -1,30 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Cpu, 
-  HardDrive, 
-  Activity, 
-  Wifi,
-  Database,
-  Zap,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  Clock,
-  Play,
-  CheckCircle,
-  XCircle,
-  RefreshCw,
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Stack,
+  Button,
+  LinearProgress,
+  Alert,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon
+} from '@mui/material';
+import {
+  Build,
+  Memory,
+  Storage,
+  Speed,
+  Cloud,
+  Refresh,
+  PlayArrow,
+  Stop,
   Download,
-  Trash2,
-  Wrench
-} from 'lucide-react';
-import AOS from 'aos';
+  Delete,
+  CheckCircle,
+  Error,
+  Warning
+} from '@mui/icons-material';
 
 interface SystemMetric {
   name: string;
@@ -32,7 +48,6 @@ interface SystemMetric {
   unit: string;
   status: 'good' | 'warning' | 'critical';
   threshold: number;
-  icon: React.ComponentType<{ className?: string }>;
 }
 
 interface LogEntry {
@@ -54,12 +69,12 @@ interface MaintenanceTask {
 }
 
 const mockMetrics: SystemMetric[] = [
-  { name: 'CPU Usage', value: 45, unit: '%', status: 'good', threshold: 80, icon: Cpu },
-  { name: 'Memory Usage', value: 68, unit: '%', status: 'warning', threshold: 85, icon: Activity },
-  { name: 'Disk Usage', value: 34, unit: '%', status: 'good', threshold: 90, icon: HardDrive },
-  { name: 'Network I/O', value: 23, unit: 'MB/s', status: 'good', threshold: 100, icon: Wifi },
-  { name: 'Database Connections', value: 42, unit: 'active', status: 'good', threshold: 100, icon: Database },
-  { name: 'Response Time', value: 235, unit: 'ms', status: 'good', threshold: 500, icon: Zap }
+  { name: 'CPU Usage', value: 45, unit: '%', status: 'good', threshold: 80 },
+  { name: 'Memory Usage', value: 68, unit: '%', status: 'warning', threshold: 85 },
+  { name: 'Disk Usage', value: 34, unit: '%', status: 'good', threshold: 90 },
+  { name: 'Network I/O', value: 23, unit: 'MB/s', status: 'good', threshold: 100 },
+  { name: 'Database Connections', value: 42, unit: 'active', status: 'good', threshold: 100 },
+  { name: 'Response Time', value: 235, unit: 'ms', status: 'good', threshold: 500 }
 ];
 
 const mockLogs: LogEntry[] = [
@@ -142,14 +157,12 @@ const mockMaintenanceTasks: MaintenanceTask[] = [
 export const SystemMaintenanceDashboard: React.FC = () => {
   const [metrics, setMetrics] = useState<SystemMetric[]>(mockMetrics);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [maintenanceDialogOpen, setMaintenanceDialogOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<MaintenanceTask | null>(null);
+  const [isRunningTask, setIsRunningTask] = useState(false);
 
+  // Simulate real-time metric updates
   useEffect(() => {
-    AOS.init({
-      duration: 800,
-      easing: 'ease-out-cubic'
-    });
-
-    // Simulate real-time metric updates
     const interval = setInterval(() => {
       setMetrics(prev => prev.map(metric => ({
         ...metric,
@@ -164,236 +177,335 @@ export const SystemMaintenanceDashboard: React.FC = () => {
 
   const getMetricColor = (status: string) => {
     switch (status) {
-      case 'good': return 'default';
-      case 'warning': return 'secondary';
-      case 'critical': return 'destructive';
-      default: return 'outline';
+      case 'good': return 'success';
+      case 'warning': return 'warning';
+      case 'critical': return 'error';
+      default: return 'primary';
     }
   };
 
   const getLogLevelColor = (level: string) => {
     switch (level) {
-      case 'info': return 'outline';
-      case 'warning': return 'secondary';
-      case 'error': return 'destructive';
-      default: return 'outline';
+      case 'info': return 'info';
+      case 'warning': return 'warning';
+      case 'error': return 'error';
+      default: return 'default';
     }
   };
 
   const getTaskStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'default';
-      case 'running': return 'outline';
-      case 'failed': return 'destructive';
-      case 'scheduled': return 'secondary';
-      default: return 'outline';
+      case 'completed': return 'success';
+      case 'running': return 'info';
+      case 'failed': return 'error';
+      case 'scheduled': return 'default';
+      default: return 'default';
     }
   };
 
   const getTaskStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'running': return <Play className="h-4 w-4 text-blue-600" />;
-      case 'failed': return <XCircle className="h-4 w-4 text-red-600" />;
-      case 'scheduled': return <Clock className="h-4 w-4 text-gray-600" />;
+      case 'completed': return <CheckCircle color="success" />;
+      case 'running': return <PlayArrow color="info" />;
+      case 'failed': return <Error color="error" />;
+      case 'scheduled': return <Build color="action" />;
       default: return null;
     }
   };
 
   const handleRefreshMetrics = async () => {
     setIsRefreshing(true);
+    // Simulate API call
     setTimeout(() => {
       setIsRefreshing(false);
     }, 2000);
   };
 
+  const handleRunTask = async (task: MaintenanceTask) => {
+    setSelectedTask(task);
+    setMaintenanceDialogOpen(true);
+  };
+
+  const confirmRunTask = async () => {
+    setIsRunningTask(true);
+    // Simulate task execution
+    setTimeout(() => {
+      setIsRunningTask(false);
+      setMaintenanceDialogOpen(false);
+      setSelectedTask(null);
+    }, 3000);
+  };
+
+  const exportLogs = () => {
+    const csvContent = [
+      'Timestamp,Level,Category,Message',
+      ...mockLogs.map(log => 
+        `${log.timestamp},${log.level},${log.category},"${log.message}"`
+      )
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'system_logs.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
-    <div className="min-h-screen finance-bg-animated">
-      <div className="p-6 space-y-6">
-        <div data-aos="fade-down">
-          <h1 className="finance-heading text-yellow-600">System Maintenance</h1>
-          <p className="text-muted-foreground">Monitor system performance, manage maintenance tasks, and view system logs</p>
-        </div>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
+        System Maintenance
+      </Typography>
+      
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+        Monitor system performance, manage maintenance tasks, and view system logs
+      </Typography>
 
-        {/* System Health Alert */}
-        <Alert data-aos="fade-up" data-aos-delay="100" className="border-blue-200 bg-blue-50">
-          <AlertTriangle className="h-4 w-4 text-blue-600" />
-          <AlertDescription className="text-blue-800">
-            System status: All critical services are operational. Next scheduled maintenance: Jan 21, 2024 at 2:00 AM
-          </AlertDescription>
-        </Alert>
+      {/* System Health Alert */}
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <Typography variant="body2">
+          System status: All critical services are operational. Next scheduled maintenance: Jan 21, 2024 at 2:00 AM
+        </Typography>
+      </Alert>
 
-        {/* System Metrics */}
-        <Card data-aos="fade-up" data-aos-delay="200">
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <div>
-                <CardTitle className="text-yellow-600">System Performance Metrics</CardTitle>
-                <CardDescription>Real-time monitoring of system resources</CardDescription>
-              </div>
-              <Button
-                variant="outline"
-                onClick={handleRefreshMetrics}
-                disabled={isRefreshing}
-                className="border-yellow-200 text-yellow-700 hover:bg-yellow-50"
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? 'Refreshing...' : 'Refresh'}
-              </Button>
-            </div>
-          </CardHeader>
+      {/* System Metrics */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+            <Typography variant="h6" fontWeight={600}>
+              System Performance Metrics
+            </Typography>
+            <Button
+              variant="outlined"
+              startIcon={<Refresh />}
+              onClick={handleRefreshMetrics}
+              disabled={isRefreshing}
+            >
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+            </Button>
+          </Stack>
+
+          <Stack direction="row" spacing={3} flexWrap="wrap">
+            {metrics.map((metric) => (
+              <Card key={metric.name} sx={{ minWidth: 200, flex: 1 }}>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    <Box sx={{ 
+                      p: 1.5, 
+                      borderRadius: 2, 
+                      bgcolor: `${getMetricColor(metric.status)}.light`,
+                      color: `${getMetricColor(metric.status)}.contrastText`
+                    }}>
+                      {metric.name.includes('CPU') && <Speed />}
+                      {metric.name.includes('Memory') && <Memory />}
+                      {metric.name.includes('Disk') && <Storage />}
+                      {metric.name.includes('Network') && <Cloud />}
+                      {metric.name.includes('Database') && <Storage />}
+                      {metric.name.includes('Response') && <Speed />}
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="h6" fontWeight={600}>
+                        {Math.round(metric.value)}{metric.unit}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {metric.name}
+                      </Typography>
+                      <LinearProgress
+                        variant="determinate"
+                        value={Math.min(100, (metric.value / metric.threshold) * 100)}
+                        color={getMetricColor(metric.status) as any}
+                        sx={{ mt: 1 }}
+                      />
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+            ))}
+          </Stack>
+        </CardContent>
+      </Card>
+
+      <Stack spacing={3}>
+        {/* Maintenance Tasks */}
+        <Card>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {metrics.map((metric) => (
-                <Card key={metric.name} className="border-l-4 border-l-yellow-400">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-4">
-                      <div className={`p-3 rounded-lg ${
-                        metric.status === 'good' ? 'bg-green-100' :
-                        metric.status === 'warning' ? 'bg-yellow-100' : 'bg-red-100'
-                      }`}>
-                        <metric.icon className={`h-6 w-6 ${
-                          metric.status === 'good' ? 'text-green-600' :
-                          metric.status === 'warning' ? 'text-yellow-600' : 'text-red-600'
-                        }`} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-semibold text-sm">{metric.name}</h3>
-                          <Badge variant={getMetricColor(metric.status) as any}>
-                            {metric.status.toUpperCase()}
-                          </Badge>
-                        </div>
-                        <p className="text-2xl font-bold">
-                          {Math.round(metric.value)}{metric.unit}
-                        </p>
-                        <Progress
-                          value={Math.min(100, (metric.value / metric.threshold) * 100)}
-                          className="mt-2"
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              Scheduled Maintenance Tasks
+            </Typography>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 600 }}>Task</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Description</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Last Run</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Next Run</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Duration</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {mockMaintenanceTasks.map((task) => (
+                    <TableRow key={task.id} hover>
+                      <TableCell>
+                        <Typography variant="body2" fontWeight={600}>
+                          {task.name}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{task.description}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{task.lastRun}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{task.nextRun}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{task.duration}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          {getTaskStatusIcon(task.status)}
+                          <Chip 
+                            label={task.status.toUpperCase()} 
+                            color={getTaskStatusColor(task.status) as any}
+                            size="small"
+                          />
+                        </Stack>
+                      </TableCell>
+                      <TableCell>
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<PlayArrow />}
+                            onClick={() => handleRunTask(task)}
+                            disabled={task.status === 'running'}
+                          >
+                            Run Now
+                          </Button>
+                          <IconButton size="small" color="primary">
+                            <Build />
+                          </IconButton>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </CardContent>
         </Card>
 
-        <div className="space-y-6">
-          {/* Maintenance Tasks */}
-          <Card data-aos="fade-up" data-aos-delay="300">
-            <CardHeader>
-              <CardTitle className="text-yellow-600">Scheduled Maintenance Tasks</CardTitle>
-              <CardDescription>Automated maintenance tasks and their execution status</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Task</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Last Run</TableHead>
-                    <TableHead>Next Run</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockMaintenanceTasks.map((task) => (
-                    <TableRow key={task.id} className="hover:bg-yellow-50/50">
-                      <TableCell className="font-medium">{task.name}</TableCell>
-                      <TableCell>{task.description}</TableCell>
-                      <TableCell>{task.lastRun}</TableCell>
-                      <TableCell>{task.nextRun}</TableCell>
-                      <TableCell>{task.duration}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          {getTaskStatusIcon(task.status)}
-                          <Badge variant={getTaskStatusColor(task.status) as any}>
-                            {task.status.toUpperCase()}
-                          </Badge>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={task.status === 'running'}
-                            className="border-yellow-200 text-yellow-700 hover:bg-yellow-50"
-                          >
-                            <Play className="h-4 w-4 mr-1" />
-                            Run Now
-                          </Button>
-                          <Button size="sm" variant="ghost" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
-                            <Wrench className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+        {/* System Logs */}
+        <Card>
+          <CardContent>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+              <Typography variant="h6" fontWeight={600}>
+                Recent System Logs
+              </Typography>
+              <Stack direction="row" spacing={2}>
+                <Button
+                  variant="outlined"
+                  startIcon={<Download />}
+                  onClick={exportLogs}
+                >
+                  Export Logs
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<Delete />}
+                  color="error"
+                >
+                  Clear Logs
+                </Button>
+              </Stack>
+            </Stack>
 
-          {/* System Logs */}
-          <Card data-aos="fade-up" data-aos-delay="400">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle className="text-yellow-600">Recent System Logs</CardTitle>
-                  <CardDescription>System events and error logs</CardDescription>
-                </div>
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    className="border-blue-200 text-blue-700 hover:bg-blue-50"
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Logs
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="border-red-200 text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Clear Logs
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
+            <TableContainer>
               <Table>
-                <TableHeader>
+                <TableHead>
                   <TableRow>
-                    <TableHead>Timestamp</TableHead>
-                    <TableHead>Level</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Message</TableHead>
+                    <TableCell sx={{ fontWeight: 600 }}>Timestamp</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Level</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Category</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Message</TableCell>
                   </TableRow>
-                </TableHeader>
+                </TableHead>
                 <TableBody>
                   {mockLogs.map((log) => (
-                    <TableRow key={log.id} className="hover:bg-yellow-50/50">
-                      <TableCell className="font-mono text-sm">{log.timestamp}</TableCell>
+                    <TableRow key={log.id} hover>
                       <TableCell>
-                        <Badge variant={getLogLevelColor(log.level) as any}>
-                          {log.level.toUpperCase()}
-                        </Badge>
+                        <Typography variant="body2">{log.timestamp}</Typography>
                       </TableCell>
-                      <TableCell>{log.category}</TableCell>
-                      <TableCell>{log.message}</TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={log.level.toUpperCase()} 
+                          color={getLogLevelColor(log.level) as any}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{log.category}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{log.message}</Typography>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
+            </TableContainer>
+          </CardContent>
+        </Card>
+      </Stack>
+
+      {/* Run Task Dialog */}
+      <Dialog open={maintenanceDialogOpen} onClose={() => setMaintenanceDialogOpen(false)}>
+        <DialogTitle>Run Maintenance Task</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Are you sure you want to run the following maintenance task?
+          </Typography>
+          {selectedTask && (
+            <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
+              <Typography variant="subtitle2" fontWeight={600}>
+                {selectedTask.name}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                {selectedTask.description}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Estimated duration: {selectedTask.duration}
+              </Typography>
+            </Paper>
+          )}
+          {isRunningTask && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                Running maintenance task...
+              </Typography>
+              <LinearProgress />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setMaintenanceDialogOpen(false)} disabled={isRunningTask}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={confirmRunTask} 
+            variant="contained" 
+            disabled={isRunningTask}
+          >
+            Run Task
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
