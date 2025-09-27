@@ -214,7 +214,7 @@ export const MaterialSidebar: React.FC<MaterialSidebarProps> = ({ open, onClose 
             <Avatar sx={{ bgcolor: 'primary.main' }}>
               <AccountBalance />
             </Avatar>
-            <Typography variant="h6" fontWeight="bold" sx={{ color: '#EAB308' }}>
+            <Typography variant="body1" fontWeight="bold" sx={{ color: '#EAB308' }}>
               Feature Digital LTD
             </Typography>
           </Box>

@@ -1,21 +1,9 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Stack,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Button,
-  Chip,
-  Paper,
-  ToggleButton,
-  ToggleButtonGroup
-} from '@mui/material';
-import {
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { 
   BarChart,
   Bar,
   LineChart,
@@ -37,11 +25,12 @@ import {
 import {
   TrendingUp,
   TrendingDown,
-  Analytics,
-  Assessment,
-  Warning,
-  Schedule
-} from '@mui/icons-material';
+  BarChart3,
+  AlertTriangle,
+  Clock,
+  Download
+} from 'lucide-react';
+import AOS from 'aos';
 
 const trendData = [
   { month: 'Jan', highValue: 15, totalRequests: 45, avgAmount: 2800, efficiency: 85 },
@@ -93,392 +82,363 @@ const efficiencyData = [
 export const AdvancedAnalyticsDashboard: React.FC = () => {
   const [timeRange, setTimeRange] = useState('6months');
   const [viewType, setViewType] = useState('trends');
-  const [selectedMetric, setSelectedMetric] = useState('amount');
 
-  const COLORS = ['#1976d2', '#388e3c', '#f57c00', '#d32f2f', '#7b1fa2'];
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-out-cubic'
+    });
+  }, []);
+
+  const COLORS = ['#EAB308', '#22C55E', '#F97316', '#EF4444', '#8B5CF6'];
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
-        Advanced Analytics
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Deep insights and predictive analytics for financial operations
-      </Typography>
+    <div className="min-h-screen finance-bg-animated">
+      <div className="p-6 space-y-6">
+        <div data-aos="fade-down">
+          <h1 className="finance-heading text-yellow-600">Advanced Analytics</h1>
+          <p className="text-muted-foreground">Deep insights and predictive analytics for financial operations</p>
+        </div>
 
-      {/* Controls */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
-          <Stack direction="row" spacing={2}>
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel>Time Range</InputLabel>
-              <Select
-                value={timeRange}
-                label="Time Range"
-                onChange={(e) => setTimeRange(e.target.value)}
-              >
-                <MenuItem value="1month">Last Month</MenuItem>
-                <MenuItem value="3months">Last 3 Months</MenuItem>
-                <MenuItem value="6months">Last 6 Months</MenuItem>
-                <MenuItem value="1year">Last Year</MenuItem>
-              </Select>
-            </FormControl>
+        {/* Controls */}
+        <Card data-aos="fade-up" data-aos-delay="100">
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="flex flex-wrap items-center gap-4">
+                <Select value={timeRange} onValueChange={setTimeRange}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1month">Last Month</SelectItem>
+                    <SelectItem value="3months">Last 3 Months</SelectItem>
+                    <SelectItem value="6months">Last 6 Months</SelectItem>
+                    <SelectItem value="1year">Last Year</SelectItem>
+                  </SelectContent>
+                </Select>
 
-            <ToggleButtonGroup
-              value={viewType}
-              exclusive
-              onChange={(_, newValue) => newValue && setViewType(newValue)}
-              size="small"
-            >
-              <ToggleButton value="trends">Trends</ToggleButton>
-              <ToggleButton value="risk">Risk Analysis</ToggleButton>
-              <ToggleButton value="efficiency">Efficiency</ToggleButton>
-              <ToggleButton value="predictions">Predictions</ToggleButton>
-            </ToggleButtonGroup>
-          </Stack>
-
-          <Button variant="outlined" startIcon={<Analytics />}>
-            Export Analysis
-          </Button>
-        </Stack>
-      </Paper>
-
-      {/* Key Metrics */}
-      <Stack direction="row" spacing={3} sx={{ mb: 4 }}>
-        <Card sx={{ flex: 1 }}>
-          <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <Box sx={{ 
-                p: 1.5, 
-                borderRadius: 2, 
-                bgcolor: 'success.light',
-                color: 'success.contrastText'
-              }}>
-                <TrendingUp />
-              </Box>
-              <Box>
-                <Typography variant="h5" fontWeight={600} color="success.main">
-                  +12.5%
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Processing Efficiency
-                </Typography>
-              </Box>
-            </Stack>
-          </CardContent>
-        </Card>
-
-        <Card sx={{ flex: 1 }}>
-          <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <Box sx={{ 
-                p: 1.5, 
-                borderRadius: 2, 
-                bgcolor: 'warning.light',
-                color: 'warning.contrastText'
-              }}>
-                <Warning />
-              </Box>
-              <Box>
-                <Typography variant="h5" fontWeight={600} color="warning.main">
-                  3
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  High-Risk Transactions
-                </Typography>
-              </Box>
-            </Stack>
-          </CardContent>
-        </Card>
-
-        <Card sx={{ flex: 1 }}>
-          <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <Box sx={{ 
-                p: 1.5, 
-                borderRadius: 2, 
-                bgcolor: 'info.light',
-                color: 'info.contrastText'
-              }}>
-                <Schedule />
-              </Box>
-              <Box>
-                <Typography variant="h5" fontWeight={600} color="info.main">
-                  1.8 days
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Avg. Approval Time
-                </Typography>
-              </Box>
-            </Stack>
-          </CardContent>
-        </Card>
-
-        <Card sx={{ flex: 1 }}>
-          <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <Box sx={{ 
-                p: 1.5, 
-                borderRadius: 2, 
-                bgcolor: 'error.light',
-                color: 'error.contrastText'
-              }}>
-                <TrendingDown />
-              </Box>
-              <Box>
-                <Typography variant="h5" fontWeight={600} color="error.main">
-                  -5.2%
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Late Payments
-                </Typography>
-              </Box>
-            </Stack>
-          </CardContent>
-        </Card>
-      </Stack>
-
-      {/* Main Analytics Content */}
-      {viewType === 'trends' && (
-        <Stack spacing={3}>
-          {/* High-Value Transaction Trends */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                High-Value Transaction Trends
-              </Typography>
-              <Box sx={{ height: 350 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={trendData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Area type="monotone" dataKey="highValue" stroke="#d32f2f" fill="#d32f2f" fillOpacity={0.3} name="High-Value Requests" />
-                    <Area type="monotone" dataKey="totalRequests" stroke="#1976d2" fill="#1976d2" fillOpacity={0.3} name="Total Requests" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardContent>
-          </Card>
-
-          {/* Cash Flow Analysis */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Weekly Cash Flow Analysis
-              </Typography>
-              <Box sx={{ height: 350 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={cashflowData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="week" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="incoming" fill="#388e3c" name="Incoming" />
-                    <Bar dataKey="outgoing" fill="#d32f2f" name="Outgoing" />
-                    <Bar dataKey="pending" fill="#f57c00" name="Pending" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardContent>
-          </Card>
-        </Stack>
-      )}
-
-      {viewType === 'risk' && (
-        <Stack spacing={3}>
-          {/* Department Risk Scores */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Department Risk Analysis
-              </Typography>
-              <Box sx={{ height: 350 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <ScatterChart data={departmentRiskData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="avgDelay" name="Avg Delay (days)" />
-                    <YAxis dataKey="riskScore" name="Risk Score" />
-                    <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-                    <Scatter dataKey="riskScore" fill="#d32f2f" />
-                  </ScatterChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardContent>
-          </Card>
-
-          {/* Vendor Reliability */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Vendor Performance & Risk
-              </Typography>
-              <Box sx={{ height: 350 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={vendorAnalysisData} layout="horizontal">
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis type="category" dataKey="vendor" />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="reliability" fill="#388e3c" name="Reliability %" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardContent>
-          </Card>
-        </Stack>
-      )}
-
-      {viewType === 'efficiency' && (
-        <Stack spacing={3}>
-          {/* Processing Efficiency by Time */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Daily Processing Efficiency
-              </Typography>
-              <Box sx={{ height: 350 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={efficiencyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="time" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="approvals" stroke="#1976d2" strokeWidth={3} name="Approvals" />
-                    <Line type="monotone" dataKey="submissions" stroke="#388e3c" strokeWidth={3} name="Submissions" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardContent>
-          </Card>
-
-          {/* Department Efficiency Metrics */}
-          <Stack direction="row" spacing={3}>
-            <Card sx={{ flex: 1 }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                  Processing Times by Department
-                </Typography>
-                <Stack spacing={2}>
-                  {departmentRiskData.map((dept, index) => (
-                    <Box key={dept.department}>
-                      <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Typography variant="body2">{dept.department}</Typography>
-                        <Chip 
-                          label={`${dept.avgDelay} days`} 
-                          color={dept.avgDelay < 1.5 ? 'success' : dept.avgDelay < 2 ? 'warning' : 'error'}
-                          size="small"
-                        />
-                      </Stack>
-                    </Box>
+                <div className="flex bg-muted rounded-lg p-1">
+                  {['trends', 'risk', 'efficiency', 'predictions'].map((type) => (
+                    <Button
+                      key={type}
+                      variant={viewType === type ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewType(type)}
+                      className={viewType === type ? 'finance-button-primary' : ''}
+                    >
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </Button>
                   ))}
-                </Stack>
-              </CardContent>
-            </Card>
+                </div>
+              </div>
 
-            <Card sx={{ flex: 1 }}>
+              <Button variant="outline" className="border-yellow-200 text-yellow-700 hover:bg-yellow-50">
+                <Download className="h-4 w-4 mr-2" />
+                Export Analysis
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6" data-aos="fade-up" data-aos-delay="200">
+          <Card className="finance-card">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-green-100 rounded-lg">
+                  <TrendingUp className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-green-600">+12.5%</p>
+                  <p className="text-sm text-muted-foreground">Processing Efficiency</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="finance-card">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-orange-100 rounded-lg">
+                  <AlertTriangle className="h-6 w-6 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-orange-600">3</p>
+                  <p className="text-sm text-muted-foreground">High-Risk Transactions</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="finance-card">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-blue-100 rounded-lg">
+                  <Clock className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-blue-600">1.8 days</p>
+                  <p className="text-sm text-muted-foreground">Avg. Approval Time</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="finance-card">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-red-100 rounded-lg">
+                  <TrendingDown className="h-6 w-6 text-red-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-red-600">-5.2%</p>
+                  <p className="text-sm text-muted-foreground">Late Payments</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Analytics Content */}
+        {viewType === 'trends' && (
+          <div className="space-y-6" data-aos="fade-up" data-aos-delay="300">
+            {/* High-Value Transaction Trends */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-yellow-600">High-Value Transaction Trends</CardTitle>
+                <CardDescription>Monthly analysis of high-value payment requests</CardDescription>
+              </CardHeader>
               <CardContent>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                  Compliance Scores
-                </Typography>
-                <Box sx={{ height: 200 }}>
+                <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={departmentRiskData}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={80}
-                        dataKey="compliance"
-                        nameKey="department"
-                        label={({ department, compliance }) => `${department}: ${compliance}%`}
-                      >
-                        {departmentRiskData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
+                    <AreaChart data={trendData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
                       <Tooltip />
-                    </PieChart>
+                      <Legend />
+                      <Area type="monotone" dataKey="highValue" stroke="#EF4444" fill="#FEE2E2" name="High-Value Requests" />
+                      <Area type="monotone" dataKey="totalRequests" stroke="#EAB308" fill="#FEF3C7" name="Total Requests" />
+                    </AreaChart>
                   </ResponsiveContainer>
-                </Box>
+                </div>
               </CardContent>
             </Card>
-          </Stack>
-        </Stack>
-      )}
 
-      {viewType === 'predictions' && (
-        <Stack spacing={3}>
-          {/* Predictive Models */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Predictive Cash Flow (Next 6 Months)
-              </Typography>
-              <Box sx={{ height: 350 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={[
-                    { month: 'Jul', predicted: 165000, confidence: 0.95 },
-                    { month: 'Aug', predicted: 172000, confidence: 0.92 },
-                    { month: 'Sep', predicted: 158000, confidence: 0.89 },
-                    { month: 'Oct', predicted: 178000, confidence: 0.85 },
-                    { month: 'Nov', predicted: 162000, confidence: 0.82 },
-                    { month: 'Dec', predicted: 185000, confidence: 0.78 }
-                  ]}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="predicted" stroke="#1976d2" strokeWidth={3} strokeDasharray="5 5" name="Predicted Amount" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardContent>
-          </Card>
+            {/* Cash Flow Analysis */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-yellow-600">Weekly Cash Flow Analysis</CardTitle>
+                <CardDescription>Incoming vs outgoing payment flows</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={cashflowData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="week" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="incoming" fill="#22C55E" name="Incoming" />
+                      <Bar dataKey="outgoing" fill="#EF4444" name="Outgoing" />
+                      <Bar dataKey="pending" fill="#F97316" name="Pending" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-          {/* Risk Predictions */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Risk Predictions & Anomaly Detection
-              </Typography>
-              <Stack spacing={2}>
-                <Box sx={{ p: 2, bgcolor: 'warning.light', borderRadius: 1 }}>
-                  <Typography variant="body2" fontWeight={600}>
-                    ⚠️ Anomaly Detected: IT Department showing 35% increase in high-value requests
-                  </Typography>
-                  <Typography variant="caption">
-                    Predicted impact: $45K additional spend this month
-                  </Typography>
-                </Box>
-                <Box sx={{ p: 2, bgcolor: 'info.light', borderRadius: 1 }}>
-                  <Typography variant="body2" fontWeight={600}>
-                    📈 Trend Alert: Marketing department approval times trending upward
-                  </Typography>
-                  <Typography variant="caption">
-                    Expected delay increase: 0.8 days by month end
-                  </Typography>
-                </Box>
-                <Box sx={{ p: 2, bgcolor: 'success.light', borderRadius: 1 }}>
-                  <Typography variant="body2" fontWeight={600}>
-                    ✅ Optimization Opportunity: Sales department efficiency improved 15%
-                  </Typography>
-                  <Typography variant="caption">
-                    Potential savings: $12K through process automation
-                  </Typography>
-                </Box>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Stack>
-      )}
-    </Box>
+        {viewType === 'risk' && (
+          <div className="space-y-6" data-aos="fade-up" data-aos-delay="300">
+            {/* Department Risk Scores */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-yellow-600">Department Risk Analysis</CardTitle>
+                <CardDescription>Risk scores vs average processing delays</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ScatterChart data={departmentRiskData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="avgDelay" name="Avg Delay (days)" />
+                      <YAxis dataKey="riskScore" name="Risk Score" />
+                      <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+                      <Scatter dataKey="riskScore" fill="#EF4444" />
+                    </ScatterChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Vendor Reliability */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-yellow-600">Vendor Performance & Risk</CardTitle>
+                <CardDescription>Vendor reliability scores and performance metrics</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={vendorAnalysisData} layout="horizontal">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis type="number" />
+                      <YAxis type="category" dataKey="vendor" />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="reliability" fill="#22C55E" name="Reliability %" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {viewType === 'efficiency' && (
+          <div className="space-y-6" data-aos="fade-up" data-aos-delay="300">
+            {/* Processing Efficiency by Time */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-yellow-600">Daily Processing Efficiency</CardTitle>
+                <CardDescription>Hourly breakdown of approvals and submissions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={efficiencyData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="time" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Line type="monotone" dataKey="approvals" stroke="#EAB308" strokeWidth={3} name="Approvals" />
+                      <Line type="monotone" dataKey="submissions" stroke="#22C55E" strokeWidth={3} name="Submissions" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Department Efficiency Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-yellow-600">Processing Times by Department</CardTitle>
+                  <CardDescription>Average processing delays across departments</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {departmentRiskData.map((dept) => (
+                    <div key={dept.department} className="flex justify-between items-center">
+                      <span className="font-medium">{dept.department}</span>
+                      <Badge 
+                        variant={dept.avgDelay < 1.5 ? 'default' : dept.avgDelay < 2 ? 'secondary' : 'destructive'}
+                      >
+                        {dept.avgDelay} days
+                      </Badge>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-yellow-600">Compliance Scores</CardTitle>
+                  <CardDescription>Department compliance percentages</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={departmentRiskData}
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={80}
+                          dataKey="compliance"
+                          nameKey="department"
+                          label={({ department, compliance }) => `${department}: ${compliance}%`}
+                        >
+                          {departmentRiskData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {viewType === 'predictions' && (
+          <div className="space-y-6" data-aos="fade-up" data-aos-delay="300">
+            {/* Predictive Models */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-yellow-600">Predictive Cash Flow (Next 6 Months)</CardTitle>
+                <CardDescription>AI-powered predictions based on historical data</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={[
+                      { month: 'Jul', predicted: 165000, confidence: 0.95 },
+                      { month: 'Aug', predicted: 172000, confidence: 0.92 },
+                      { month: 'Sep', predicted: 158000, confidence: 0.89 },
+                      { month: 'Oct', predicted: 178000, confidence: 0.85 },
+                      { month: 'Nov', predicted: 162000, confidence: 0.82 },
+                      { month: 'Dec', predicted: 185000, confidence: 0.78 }
+                    ]}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Line type="monotone" dataKey="predicted" stroke="#EAB308" strokeWidth={3} strokeDasharray="5 5" name="Predicted Amount" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Risk Predictions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-yellow-600">Risk Predictions & Anomaly Detection</CardTitle>
+                <CardDescription>AI-powered risk analysis and anomaly alerts</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-start space-x-3">
+                    <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-yellow-800">Anomaly Detected: IT Department</p>
+                      <p className="text-sm text-yellow-700">35% increase in high-value requests detected</p>
+                      <p className="text-xs text-yellow-600 mt-1">Predicted impact: $45K additional spend this month</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-start space-x-3">
+                    <BarChart3 className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-blue-800">Optimization Opportunity</p>
+                      <p className="text-sm text-blue-700">Marketing department showing 15% faster processing times</p>
+                      <p className="text-xs text-blue-600 mt-1">Consider applying similar workflows to other departments</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };

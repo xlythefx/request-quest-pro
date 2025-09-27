@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Upload, X, DollarSign, Calendar, Building2, User } from 'lucide-react';
+import AOS from 'aos';
 
 export const PaymentRequestForm = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -14,6 +15,13 @@ export const PaymentRequestForm = () => {
   const [currency, setCurrency] = useState('USD');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [customCategory, setCustomCategory] = useState('');
+
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-out-cubic'
+    });
+  }, []);
 
   const currencies = [
     { code: 'USD', symbol: '$', name: 'US Dollar' },
@@ -90,16 +98,17 @@ export const PaymentRequestForm = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="finance-heading">New Payment Request</h1>
-        <p className="text-muted-foreground">Submit a new payment request for approval</p>
-      </div>
+    <div className="min-h-screen finance-bg-animated">
+      <div className="max-w-4xl mx-auto p-6 space-y-6">
+        {/* Header */}
+        <div data-aos="fade-down">
+          <h1 className="finance-heading text-yellow-600">New Payment Request</h1>
+          <p className="text-muted-foreground">Submit a new payment request for approval</p>
+        </div>
 
-      <form className="space-y-6">
-        {/* Contact Information */}
-        <Card>
+        <form className="space-y-6">
+          {/* Contact Information */}
+          <Card data-aos="fade-up" data-aos-delay="100" className="finance-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
@@ -138,8 +147,8 @@ export const PaymentRequestForm = () => {
           </CardContent>
         </Card>
 
-        {/* Vendor/Company Information */}
-        <Card>
+          {/* Vendor/Company Information */}
+          <Card data-aos="fade-up" data-aos-delay="200" className="finance-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
@@ -169,8 +178,8 @@ export const PaymentRequestForm = () => {
           </CardContent>
         </Card>
 
-        {/* Payment Details */}
-        <Card>
+          {/* Payment Details */}
+          <Card data-aos="fade-up" data-aos-delay="300" className="finance-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5" />
@@ -273,8 +282,8 @@ export const PaymentRequestForm = () => {
           </CardContent>
         </Card>
 
-        {/* File Upload */}
-        <Card>
+          {/* File Upload */}
+          <Card data-aos="fade-up" data-aos-delay="400" className="finance-card">
           <CardHeader>
             <CardTitle>Supporting Documents</CardTitle>
             <CardDescription>Upload invoices, receipts, contracts, or other supporting documents (PDF, JPG, PNG, DOC, DOCX - Max 10MB each)</CardDescription>
@@ -328,19 +337,20 @@ export const PaymentRequestForm = () => {
           </CardContent>
         </Card>
 
-        {/* Submit Actions */}
-        <div className="flex gap-4 pt-4">
-          <Button type="submit" className="finance-button-accent flex-1 sm:flex-initial">
-            Submit Request
-          </Button>
-          <Button type="button" variant="outline">
-            Save as Draft
-          </Button>
-          <Button type="button" variant="ghost">
-            Cancel
-          </Button>
-        </div>
-      </form>
+          {/* Submit Actions */}
+          <div data-aos="fade-up" data-aos-delay="500" className="flex gap-4 pt-4">
+            <Button type="submit" className="finance-button-primary flex-1 sm:flex-initial">
+              Submit Request
+            </Button>
+            <Button type="button" variant="outline" className="border-yellow-200 text-yellow-700 hover:bg-yellow-50">
+              Save as Draft
+            </Button>
+            <Button type="button" variant="ghost">
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
