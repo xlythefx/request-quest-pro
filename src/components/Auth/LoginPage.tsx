@@ -1,19 +1,14 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Paper,
-  TextField,
-  Button,
-  Typography,
-  Container,
-  MenuItem,
-  Alert,
-  CircularProgress,
-  Avatar,
-  CssBaseline
-} from '@mui/material';
-import { AccountBalance } from '@mui/icons-material';
+import React, { useState, useEffect } from 'react';
+import { Building2, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth, UserRole } from '../../contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 const roles = [
   { value: 'employee', label: 'Employee' },
@@ -30,6 +25,14 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   
   const { login } = useAuth();
+
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-out-cubic',
+      once: true,
+    });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,142 +52,136 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <>
-      <CssBaseline />
-      <Box
-        sx={{
-          minHeight: '100vh',
-          background: 'linear-gradient(135deg, #1e3a8a 0%, #0ea5e9 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          py: 4
-        }}
-      >
-        <Container maxWidth="sm">
-          <Paper
-            elevation={24}
-            sx={{
-              p: 6,
-              borderRadius: 3,
-              backdropFilter: 'blur(10px)',
-              background: 'rgba(255, 255, 255, 0.95)'
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-secondary/20">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-primary/5 rounded-full blur-3xl animate-pulse delay-500"></div>
+      </div>
+
+      {/* Floating Particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-2 h-2 bg-white/20 rounded-full animate-pulse"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 2}s`
             }}
-          >
-            <Box sx={{ textAlign: 'center', mb: 4 }}>
-              <Avatar
-                sx={{
-                  mx: 'auto',
-                  mb: 2,
-                  bgcolor: 'primary.main',
-                  width: 64,
-                  height: 64
-                }}
-              >
-                <AccountBalance sx={{ fontSize: 32 }} />
-              </Avatar>
-              <Typography variant="h4" component="h1" fontWeight="bold" color="primary.main">
+          />
+        ))}
+      </div>
+
+      <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <Card className="w-full max-w-md shadow-2xl border-0 bg-white/95 backdrop-blur-xl" data-aos="fade-up">
+          <CardHeader className="text-center space-y-4 pb-2">
+            <div 
+              className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center shadow-lg"
+              data-aos="zoom-in"
+              data-aos-delay="200"
+            >
+              <Building2 className="h-8 w-8 text-white" />
+            </div>
+            
+            <div data-aos="fade-up" data-aos-delay="300">
+              <CardTitle className="text-2xl font-bold text-foreground">
                 Feature Digital LTD
-              </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+              </CardTitle>
+              <CardDescription className="text-base mt-2 font-medium text-secondary">
                 Finance Department Dashboard
-              </Typography>
-            </Box>
+              </CardDescription>
+            </div>
+          </CardHeader>
 
-            <form onSubmit={handleSubmit}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                {error && (
-                  <Alert severity="error" sx={{ borderRadius: 2 }}>
-                    {error}
-                  </Alert>
-                )}
+          <CardContent className="space-y-6 pt-2">
+            {error && (
+              <Alert className="border-destructive/20 bg-destructive/5" data-aos="shake">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-destructive">
+                  {error}
+                </AlertDescription>
+              </Alert>
+            )}
 
-                <TextField
-                  fullWidth
-                  label="Email Address"
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2" data-aos="fade-right" data-aos-delay="400">
+                <Label htmlFor="email" className="text-sm font-medium">
+                  Email Address
+                </Label>
+                <Input
+                  id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  variant="outlined"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2
-                    }
-                  }}
+                  className="h-11 transition-all duration-200 focus:scale-[1.02]"
+                  placeholder="Enter your email"
                 />
+              </div>
 
-                <TextField
-                  fullWidth
-                  label="Password"
+              <div className="space-y-2" data-aos="fade-right" data-aos-delay="500">
+                <Label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </Label>
+                <Input
+                  id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  variant="outlined"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2
-                    }
-                  }}
+                  className="h-11 transition-all duration-200 focus:scale-[1.02]"
+                  placeholder="Enter your password"
                 />
+              </div>
 
-                <TextField
-                  fullWidth
-                  select
-                  label="Role"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as UserRole)}
-                  variant="outlined"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2
-                    }
-                  }}
-                >
-                  {roles.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </TextField>
+              <div className="space-y-2" data-aos="fade-right" data-aos-delay="600">
+                <Label htmlFor="role" className="text-sm font-medium">
+                  Role
+                </Label>
+                <Select value={role} onValueChange={(value) => setRole(value as UserRole)}>
+                  <SelectTrigger className="h-11 transition-all duration-200 focus:scale-[1.02]">
+                    <SelectValue placeholder="Select your role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  size="large"
-                  disabled={loading}
-                  sx={{
-                    mt: 2,
-                    py: 1.5,
-                    borderRadius: 2,
-                    textTransform: 'none',
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                    background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
-                    }
-                  }}
-                >
-                  {loading ? (
-                    <CircularProgress size={24} color="inherit" />
-                  ) : (
-                    'Log In'
-                  )}
-                </Button>
-              </Box>
+              <Button
+                type="submit"
+                className="w-full h-12 text-base font-semibold finance-button-primary shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                disabled={loading}
+                data-aos="fade-up"
+                data-aos-delay="700"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Logging in...
+                  </>
+                ) : (
+                  'Log In'
+                )}
+              </Button>
             </form>
 
-            <Box sx={{ mt: 4, textAlign: 'center' }}>
-              <Typography variant="body2" color="text.secondary">
+            <div className="text-center pt-4" data-aos="fade-up" data-aos-delay="800">
+              <p className="text-sm text-muted-foreground">
                 Demo Credentials: Use any email/password with your desired role
-              </Typography>
-            </Box>
-          </Paper>
-        </Container>
-      </Box>
-    </>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
