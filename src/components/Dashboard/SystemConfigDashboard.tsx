@@ -1,32 +1,24 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Stack,
-  Switch,
-  FormControlLabel,
-  TextField,
-  Button,
-  Divider,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Slider,
-  Chip,
-  Paper
-} from '@mui/material';
-import {
-  Save,
-  Restore,
-  Security,
-  Notifications,
-  Business,
-  Payment,
-  Settings
-} from '@mui/icons-material';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Save, 
+  RotateCcw, 
+  Settings, 
+  Bell, 
+  Building2, 
+  CreditCard,
+  Shield,
+  Workflow,
+  Trash2
+} from 'lucide-react';
+import AOS from 'aos';
 
 interface SystemConfig {
   // General Settings
@@ -61,7 +53,7 @@ interface SystemConfig {
 }
 
 const defaultConfig: SystemConfig = {
-  companyName: 'Your Company Inc.',
+  companyName: 'Feature Digital LTD',
   timezone: 'UTC-05:00',
   currency: 'USD',
   fiscalYearStart: 'January',
@@ -105,16 +97,21 @@ export const SystemConfigDashboard: React.FC = () => {
   const [config, setConfig] = useState<SystemConfig>(defaultConfig);
   const [hasChanges, setHasChanges] = useState(false);
 
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-out-cubic'
+    });
+  }, []);
+
   const updateConfig = (field: keyof SystemConfig, value: any) => {
     setConfig(prev => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };
 
   const handleSave = () => {
-    // Mock save functionality
     console.log('Saving configuration:', config);
     setHasChanges(false);
-    // Show success message
   };
 
   const handleReset = () => {
@@ -134,313 +131,313 @@ export const SystemConfigDashboard: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
-        System Configuration
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Configure system-wide settings and preferences
-      </Typography>
+    <div className="min-h-screen finance-bg-animated">
+      <div className="p-6 space-y-6">
+        <div data-aos="fade-down">
+          <h1 className="finance-heading text-yellow-600">System Configuration</h1>
+          <p className="text-muted-foreground">Configure system-wide settings and preferences</p>
+        </div>
 
-      {/* Save Actions */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Stack direction="row" spacing={2} justifyContent="flex-end">
-          <Button
-            variant="outlined"
-            startIcon={<Restore />}
-            onClick={handleReset}
-            disabled={!hasChanges}
-          >
-            Reset to Default
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<Save />}
-            onClick={handleSave}
-            disabled={!hasChanges}
-          >
-            Save Changes
-          </Button>
-        </Stack>
-      </Paper>
+        {/* Save Actions */}
+        <Card data-aos="fade-up" data-aos-delay="100">
+          <CardContent className="p-6">
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={handleReset}
+                disabled={!hasChanges}
+                className="border-yellow-200 text-yellow-700 hover:bg-yellow-50"
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Reset to Default
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={!hasChanges}
+                className="finance-button-primary"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Save Changes
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-      <Stack spacing={3}>
         {/* General Settings */}
-        <Card>
-          <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-              <Business color="primary" />
-              <Typography variant="h6" fontWeight={600}>
-                General Settings
-              </Typography>
-            </Stack>
-
-            <Stack spacing={3}>
-              <TextField
-                label="Company Name"
-                value={config.companyName}
-                onChange={(e) => updateConfig('companyName', e.target.value)}
-                fullWidth
-              />
-
-              <Stack direction="row" spacing={2}>
-                <FormControl fullWidth>
-                  <InputLabel>Timezone</InputLabel>
-                  <Select
-                    value={config.timezone}
-                    label="Timezone"
-                    onChange={(e) => updateConfig('timezone', e.target.value)}
-                  >
+        <Card data-aos="fade-up" data-aos-delay="200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-yellow-600">
+              <Building2 className="h-5 w-5" />
+              General Settings
+            </CardTitle>
+            <CardDescription>Company information and basic configuration</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="companyName">Company Name</Label>
+                <Input
+                  id="companyName"
+                  value={config.companyName}
+                  onChange={(e) => updateConfig('companyName', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="timezone">Timezone</Label>
+                <Select value={config.timezone} onValueChange={(value) => updateConfig('timezone', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
                     {timezones.map(tz => (
-                      <MenuItem key={tz} value={tz}>{tz}</MenuItem>
+                      <SelectItem key={tz} value={tz}>{tz}</SelectItem>
                     ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl fullWidth>
-                  <InputLabel>Default Currency</InputLabel>
-                  <Select
-                    value={config.currency}
-                    label="Default Currency"
-                    onChange={(e) => updateConfig('currency', e.target.value)}
-                  >
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="currency">Default Currency</Label>
+                <Select value={config.currency} onValueChange={(value) => updateConfig('currency', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
                     {currencies.map(curr => (
-                      <MenuItem key={curr} value={curr}>{curr}</MenuItem>
+                      <SelectItem key={curr} value={curr}>{curr}</SelectItem>
                     ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl fullWidth>
-                  <InputLabel>Fiscal Year Start</InputLabel>
-                  <Select
-                    value={config.fiscalYearStart}
-                    label="Fiscal Year Start"
-                    onChange={(e) => updateConfig('fiscalYearStart', e.target.value)}
-                  >
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="fiscalYear">Fiscal Year Start</Label>
+                <Select value={config.fiscalYearStart} onValueChange={(value) => updateConfig('fiscalYearStart', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
                     {months.map(month => (
-                      <MenuItem key={month} value={month}>{month}</MenuItem>
+                      <SelectItem key={month} value={month}>{month}</SelectItem>
                     ))}
-                  </Select>
-                </FormControl>
-              </Stack>
-            </Stack>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         {/* Payment Settings */}
-        <Card>
-          <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-              <Payment color="primary" />
-              <Typography variant="h6" fontWeight={600}>
-                Payment Settings
-              </Typography>
-            </Stack>
-
-            <Stack spacing={3}>
-              <Box>
-                <Typography gutterBottom>
+        <Card data-aos="fade-up" data-aos-delay="300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-yellow-600">
+              <CreditCard className="h-5 w-5" />
+              Payment Settings
+            </CardTitle>
+            <CardDescription>Configure payment approval limits and categories</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <Label className="text-base font-medium">
                   Auto-Approval Limit: ${config.autoApprovalLimit.toLocaleString()}
-                </Typography>
+                </Label>
                 <Slider
-                  value={config.autoApprovalLimit}
-                  onChange={(_, value) => updateConfig('autoApprovalLimit', value)}
-                  min={0}
+                  value={[config.autoApprovalLimit]}
+                  onValueChange={(value) => updateConfig('autoApprovalLimit', value[0])}
                   max={10000}
                   step={100}
-                  marks={[
-                    { value: 0, label: '$0' },
-                    { value: 2500, label: '$2.5K' },
-                    { value: 5000, label: '$5K' },
-                    { value: 7500, label: '$7.5K' },
-                    { value: 10000, label: '$10K' }
-                  ]}
+                  className="mt-2"
                 />
-              </Box>
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>$0</span>
+                  <span>$2.5K</span>
+                  <span>$5K</span>
+                  <span>$7.5K</span>
+                  <span>$10K</span>
+                </div>
+              </div>
 
-              <Stack spacing={2}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={config.requireDualApproval}
-                      onChange={(e) => updateConfig('requireDualApproval', e.target.checked)}
-                    />
-                  }
-                  label="Require dual approval for high-value payments"
-                />
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={config.allowSelfApproval}
-                      onChange={(e) => updateConfig('allowSelfApproval', e.target.checked)}
-                    />
-                  }
-                  label="Allow managers to approve their own requests"
-                />
-              </Stack>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="dualApproval">Require dual approval for high-value payments</Label>
+                  <Switch
+                    id="dualApproval"
+                    checked={config.requireDualApproval}
+                    onCheckedChange={(checked) => updateConfig('requireDualApproval', checked)}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="selfApproval">Allow managers to approve their own requests</Label>
+                  <Switch
+                    id="selfApproval"
+                    checked={config.allowSelfApproval}
+                    onCheckedChange={(checked) => updateConfig('allowSelfApproval', checked)}
+                  />
+                </div>
+              </div>
 
-              <Box>
-                <Typography variant="subtitle2" gutterBottom>
-                  Payment Categories
-                </Typography>
-                <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 2 }}>
+              <div>
+                <Label className="text-base font-medium mb-2 block">Payment Categories</Label>
+                <div className="flex flex-wrap gap-2 mb-2">
                   {config.paymentCategories.map((category) => (
-                    <Chip
+                    <Badge
                       key={category}
-                      label={category}
-                      onDelete={() => removeCategory(category)}
-                      color="primary"
-                      variant="outlined"
-                    />
+                      variant="secondary"
+                      className="flex items-center gap-1"
+                    >
+                      {category}
+                      <button
+                        onClick={() => removeCategory(category)}
+                        className="ml-1 hover:text-red-600"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </Badge>
                   ))}
-                </Stack>
-                <Button size="small" onClick={addCategory}>
+                </div>
+                <Button variant="outline" size="sm" onClick={addCategory}>
                   Add Category
                 </Button>
-              </Box>
-            </Stack>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         {/* Notification Settings */}
-        <Card>
-          <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-              <Notifications color="primary" />
-              <Typography variant="h6" fontWeight={600}>
-                Notification Settings
-              </Typography>
-            </Stack>
-
-            <Stack spacing={3}>
-              <Stack spacing={2}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={config.emailNotifications}
-                      onChange={(e) => updateConfig('emailNotifications', e.target.checked)}
-                    />
-                  }
-                  label="Enable email notifications"
+        <Card data-aos="fade-up" data-aos-delay="400">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-yellow-600">
+              <Bell className="h-5 w-5" />
+              Notification Settings
+            </CardTitle>
+            <CardDescription>Configure notification preferences and reminders</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="emailNotif">Enable email notifications</Label>
+                <Switch
+                  id="emailNotif"
+                  checked={config.emailNotifications}
+                  onCheckedChange={(checked) => updateConfig('emailNotifications', checked)}
                 />
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={config.approvalReminders}
-                      onChange={(e) => updateConfig('approvalReminders', e.target.checked)}
-                    />
-                  }
-                  label="Send approval reminders"
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="approvalReminders">Send approval reminders</Label>
+                <Switch
+                  id="approvalReminders"
+                  checked={config.approvalReminders}
+                  onCheckedChange={(checked) => updateConfig('approvalReminders', checked)}
                 />
-              </Stack>
+              </div>
+            </div>
 
-              <TextField
-                label="Reminder Frequency (hours)"
+            <div className="space-y-2">
+              <Label htmlFor="reminderFreq">Reminder Frequency (hours)</Label>
+              <Input
+                id="reminderFreq"
                 type="number"
                 value={config.reminderFrequency}
                 onChange={(e) => updateConfig('reminderFrequency', parseInt(e.target.value))}
-                sx={{ maxWidth: 200 }}
+                className="max-w-48"
               />
-            </Stack>
+            </div>
           </CardContent>
         </Card>
 
         {/* Security Settings */}
-        <Card>
-          <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-              <Security color="primary" />
-              <Typography variant="h6" fontWeight={600}>
-                Security Settings
-              </Typography>
-            </Stack>
-
-            <Stack spacing={3}>
-              <TextField
-                label="Session Timeout (minutes)"
+        <Card data-aos="fade-up" data-aos-delay="500">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-yellow-600">
+              <Shield className="h-5 w-5" />
+              Security Settings
+            </CardTitle>
+            <CardDescription>Configure security and authentication settings</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="sessionTimeout">Session Timeout (minutes)</Label>
+              <Input
+                id="sessionTimeout"
                 type="number"
                 value={config.sessionTimeout}
                 onChange={(e) => updateConfig('sessionTimeout', parseInt(e.target.value))}
-                sx={{ maxWidth: 200 }}
+                className="max-w-48"
               />
+            </div>
 
-              <Stack spacing={2}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={config.passwordComplexity}
-                      onChange={(e) => updateConfig('passwordComplexity', e.target.checked)}
-                    />
-                  }
-                  label="Enforce password complexity requirements"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="passwordComplexity">Enforce password complexity requirements</Label>
+                <Switch
+                  id="passwordComplexity"
+                  checked={config.passwordComplexity}
+                  onCheckedChange={(checked) => updateConfig('passwordComplexity', checked)}
                 />
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={config.twoFactorAuth}
-                      onChange={(e) => updateConfig('twoFactorAuth', e.target.checked)}
-                    />
-                  }
-                  label="Enable two-factor authentication"
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="twoFactor">Enable two-factor authentication</Label>
+                <Switch
+                  id="twoFactor"
+                  checked={config.twoFactorAuth}
+                  onCheckedChange={(checked) => updateConfig('twoFactorAuth', checked)}
                 />
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={config.auditLogging}
-                      onChange={(e) => updateConfig('auditLogging', e.target.checked)}
-                    />
-                  }
-                  label="Enable audit logging within web app"
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="auditLogging">Enable audit logging</Label>
+                <Switch
+                  id="auditLogging"
+                  checked={config.auditLogging}
+                  onCheckedChange={(checked) => updateConfig('auditLogging', checked)}
                 />
-              </Stack>
-            </Stack>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         {/* Workflow Settings */}
-        <Card>
-          <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-              <Settings color="primary" />
-              <Typography variant="h6" fontWeight={600}>
-                Workflow Settings
-              </Typography>
-            </Stack>
-
-            <Stack spacing={3}>
-              <Stack direction="row" spacing={2}>
-                <TextField
-                  label="Maximum Approval Levels"
+        <Card data-aos="fade-up" data-aos-delay="600">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-yellow-600">
+              <Workflow className="h-5 w-5" />
+              Workflow Settings
+            </CardTitle>
+            <CardDescription>Configure approval workflows and escalation rules</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="maxApprovalLevels">Maximum Approval Levels</Label>
+                <Input
+                  id="maxApprovalLevels"
                   type="number"
+                  min="1"
+                  max="5"
                   value={config.maxApprovalLevels}
                   onChange={(e) => updateConfig('maxApprovalLevels', parseInt(e.target.value))}
-                  inputProps={{ min: 1, max: 5 }}
-                  sx={{ maxWidth: 200 }}
                 />
-
-                <TextField
-                  label="Escalation Timeout (hours)"
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="escalationTimeout">Escalation Timeout (hours)</Label>
+                <Input
+                  id="escalationTimeout"
                   type="number"
                   value={config.escalationTimeout}
                   onChange={(e) => updateConfig('escalationTimeout', parseInt(e.target.value))}
-                  sx={{ maxWidth: 200 }}
                 />
-              </Stack>
+              </div>
+            </div>
 
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={config.holidayCalendar}
-                    onChange={(e) => updateConfig('holidayCalendar', e.target.checked)}
-                  />
-                }
-                label="Enable holiday calendar integration"
+            <div className="flex items-center justify-between">
+              <Label htmlFor="holidayCalendar">Enable holiday calendar integration</Label>
+              <Switch
+                id="holidayCalendar"
+                checked={config.holidayCalendar}
+                onCheckedChange={(checked) => updateConfig('holidayCalendar', checked)}
               />
-            </Stack>
+            </div>
           </CardContent>
         </Card>
-      </Stack>
-    </Box>
+      </div>
+    </div>
   );
 };

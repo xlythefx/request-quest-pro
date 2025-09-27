@@ -1,41 +1,22 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  Chip,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
-  Stack,
-  Paper,
-  Avatar,
-  Switch,
-  FormControlLabel
-} from '@mui/material';
-import {
-  Add,
-  Edit,
-  Delete,
-  PersonAdd,
-  Block,
-  CheckCircle
-} from '@mui/icons-material';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { 
+  UserPlus, 
+  Edit, 
+  Trash2, 
+  Users, 
+  Shield, 
+  Building2,
+  Mail,
+  Phone
+} from 'lucide-react';
+import AOS from 'aos';
 
 interface User {
   id: string;
@@ -105,38 +86,33 @@ const departments = ['Operations', 'Finance', 'Sales', 'Marketing', 'IT', 'HR', 
 
 export const UserManagementDashboard: React.FC = () => {
   const [users, setUsers] = useState<User[]>(mockUsers);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [filterRole, setFilterRole] = useState<string>('all');
   const [filterDepartment, setFilterDepartment] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    role: 'employee' as User['role'],
-    department: '',
-    status: 'active' as User['status']
-  });
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-out-cubic'
+    });
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'success';
-      case 'inactive': return 'warning';
-      case 'suspended': return 'error';
-      default: return 'default';
+      case 'active': return 'default';
+      case 'inactive': return 'secondary';
+      case 'suspended': return 'destructive';
+      default: return 'outline';
     }
   };
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'system_admin': return 'error';
-      case 'senior_management': return 'primary';
-      case 'finance_manager': return 'info';
-      case 'employee': return 'default';
-      default: return 'default';
+      case 'system_admin': return 'destructive';
+      case 'senior_management': return 'default';
+      case 'finance_manager': return 'blue';
+      case 'employee': return 'secondary';
+      default: return 'outline';
     }
   };
 
@@ -148,64 +124,6 @@ export const UserManagementDashboard: React.FC = () => {
       case 'employee': return 'Employee';
       default: return role;
     }
-  };
-
-  const handleAddUser = () => {
-    setEditingUser(null);
-    setFormData({
-      name: '',
-      email: '',
-      role: 'employee',
-      department: '',
-      status: 'active'
-    });
-    setDialogOpen(true);
-  };
-
-  const handleEditUser = (user: User) => {
-    setEditingUser(user);
-    setFormData({
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      department: user.department,
-      status: user.status
-    });
-    setDialogOpen(true);
-  };
-
-  const handleSaveUser = () => {
-    if (editingUser) {
-      // Update existing user
-      setUsers(prev => prev.map(user => 
-        user.id === editingUser.id 
-          ? { ...user, ...formData }
-          : user
-      ));
-    } else {
-      // Add new user
-      const newUser: User = {
-        id: `USR-${(users.length + 1).toString().padStart(3, '0')}`,
-        ...formData,
-        lastLogin: 'Never',
-        createdDate: new Date().toISOString().split('T')[0]
-      };
-      setUsers(prev => [...prev, newUser]);
-    }
-    setDialogOpen(false);
-  };
-
-  const handleDeleteUser = (user: User) => {
-    setUserToDelete(user);
-    setDeleteDialogOpen(true);
-  };
-
-  const confirmDeleteUser = () => {
-    if (userToDelete) {
-      setUsers(prev => prev.filter(user => user.id !== userToDelete.id));
-    }
-    setDeleteDialogOpen(false);
-    setUserToDelete(null);
   };
 
   const handleStatusToggle = (userId: string) => {
@@ -224,287 +142,218 @@ export const UserManagementDashboard: React.FC = () => {
   });
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
-        User Management
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Manage user accounts, roles, and permissions
-      </Typography>
+    <div className="min-h-screen finance-bg-animated">
+      <div className="p-6 space-y-6">
+        <div data-aos="fade-down">
+          <h1 className="finance-heading text-yellow-600">User Management</h1>
+          <p className="text-muted-foreground">Manage user accounts, roles, and permissions</p>
+        </div>
 
-      {/* Header Actions */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Stack direction="row" spacing={2}>
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel>Filter by Role</InputLabel>
-              <Select
-                value={filterRole}
-                label="Filter by Role"
-                onChange={(e) => setFilterRole(e.target.value)}
-              >
-                <MenuItem value="all">All Roles</MenuItem>
-                <MenuItem value="employee">Employee</MenuItem>
-                <MenuItem value="finance_manager">Finance Manager</MenuItem>
-                <MenuItem value="senior_management">Senior Management</MenuItem>
-                <MenuItem value="system_admin">System Admin</MenuItem>
-              </Select>
-            </FormControl>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6" data-aos="fade-up" data-aos-delay="100">
+          <Card className="finance-card">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-green-100 rounded-lg">
+                  <Users className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-green-600">
+                    {users.filter(u => u.status === 'active').length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Active Users</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel>Department</InputLabel>
-              <Select
-                value={filterDepartment}
-                label="Department"
-                onChange={(e) => setFilterDepartment(e.target.value)}
-              >
-                <MenuItem value="all">All Departments</MenuItem>
-                {departments.map(dept => (
-                  <MenuItem key={dept} value={dept}>{dept}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+          <Card className="finance-card">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-blue-100 rounded-lg">
+                  <Shield className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {users.filter(u => u.role === 'finance_manager').length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Finance Managers</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={filterStatus}
-                label="Status"
-                onChange={(e) => setFilterStatus(e.target.value)}
-              >
-                <MenuItem value="all">All Status</MenuItem>
-                <MenuItem value="active">Active</MenuItem>
-                <MenuItem value="inactive">Inactive</MenuItem>
-                <MenuItem value="suspended">Suspended</MenuItem>
-              </Select>
-            </FormControl>
-          </Stack>
+          <Card className="finance-card">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-yellow-100 rounded-lg">
+                  <Building2 className="h-6 w-6 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-yellow-600">
+                    {departments.length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Departments</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          <Button
-            variant="contained"
-            startIcon={<PersonAdd />}
-            onClick={handleAddUser}
-          >
-            Add User
-          </Button>
-        </Stack>
-      </Paper>
+          <Card className="finance-card">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-red-100 rounded-lg">
+                  <Users className="h-6 w-6 text-red-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-red-600">
+                    {users.filter(u => u.status === 'inactive').length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Inactive Users</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Statistics */}
-      <Stack direction="row" spacing={3} sx={{ mb: 3 }}>
-        <Card sx={{ flex: 1 }}>
-          <CardContent>
-            <Typography variant="h4" fontWeight={600} color="primary.main">
-              {users.filter(u => u.status === 'active').length}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Active Users
-            </Typography>
+        {/* Header Actions & Filters */}
+        <Card data-aos="fade-up" data-aos-delay="200">
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="flex flex-wrap items-center gap-4">
+                <Select value={filterRole} onValueChange={setFilterRole}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Filter by Role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Roles</SelectItem>
+                    <SelectItem value="employee">Employee</SelectItem>
+                    <SelectItem value="finance_manager">Finance Manager</SelectItem>
+                    <SelectItem value="senior_management">Senior Management</SelectItem>
+                    <SelectItem value="system_admin">System Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={filterDepartment} onValueChange={setFilterDepartment}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Departments</SelectItem>
+                    {departments.map(dept => (
+                      <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="suspended">Suspended</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button className="finance-button-primary">
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add User
+              </Button>
+            </div>
           </CardContent>
         </Card>
-        <Card sx={{ flex: 1 }}>
-          <CardContent>
-            <Typography variant="h4" fontWeight={600} color="info.main">
-              {users.filter(u => u.role === 'finance_manager').length}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Finance Managers
-            </Typography>
-          </CardContent>
-        </Card>
-        <Card sx={{ flex: 1 }}>
-          <CardContent>
-            <Typography variant="h4" fontWeight={600} color="warning.main">
-              {departments.length}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Departments
-            </Typography>
-          </CardContent>
-        </Card>
-      </Stack>
 
-      {/* Users Table */}
-      <Card>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 600 }}>User</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Role</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Department</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Last Login</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Created</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredUsers.map((user) => (
-                <TableRow key={user.id} hover>
-                  <TableCell>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <Avatar sx={{ width: 40, height: 40 }}>
-                        {user.name.split(' ').map(n => n[0]).join('')}
-                      </Avatar>
-                      <Box>
-                        <Typography variant="body2" fontWeight={600}>
-                          {user.name}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {user.email}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </TableCell>
-                  <TableCell>
-                    <Chip 
-                      label={getRoleLabel(user.role)} 
-                      color={getRoleColor(user.role) as any}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">{user.department}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Stack direction="row" spacing={1} alignItems="center">
-                      <Chip 
-                        label={user.status.toUpperCase()} 
-                        color={getStatusColor(user.status) as any}
-                        size="small"
-                      />
-                      <Switch
-                        checked={user.status === 'active'}
-                        onChange={() => handleStatusToggle(user.id)}
-                        size="small"
-                      />
-                    </Stack>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {user.lastLogin === 'Never' ? 'Never' : new Date(user.lastLogin).toLocaleDateString()}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {new Date(user.createdDate).toLocaleDateString()}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Stack direction="row" spacing={1}>
-                      <IconButton 
-                        size="small" 
-                        color="primary"
-                        onClick={() => handleEditUser(user)}
-                      >
-                        <Edit />
-                      </IconButton>
-                      <IconButton 
-                        size="small" 
-                        color="error"
-                        onClick={() => handleDeleteUser(user)}
-                      >
-                        <Delete />
-                      </IconButton>
-                    </Stack>
-                  </TableCell>
+        {/* Users Table */}
+        <Card data-aos="fade-up" data-aos-delay="300">
+          <CardHeader>
+            <CardTitle className="text-yellow-600">User Accounts</CardTitle>
+            <CardDescription>Manage user accounts and permissions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Last Login</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Card>
-
-      {/* Add/Edit User Dialog */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {editingUser ? 'Edit User' : 'Add New User'}
-        </DialogTitle>
-        <DialogContent>
-          <Stack spacing={3} sx={{ mt: 1 }}>
-            <TextField
-              label="Full Name"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              fullWidth
-              required
-            />
-            <TextField
-              label="Email Address"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              fullWidth
-              required
-            />
-            <FormControl fullWidth>
-              <InputLabel>Role</InputLabel>
-              <Select
-                value={formData.role}
-                label="Role"
-                onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value as User['role'] }))}
-              >
-                <MenuItem value="employee">Employee</MenuItem>
-                <MenuItem value="finance_manager">Finance Manager</MenuItem>
-                <MenuItem value="senior_management">Senior Management</MenuItem>
-                <MenuItem value="system_admin">System Admin</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel>Department</InputLabel>
-              <Select
-                value={formData.department}
-                label="Department"
-                onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
-              >
-                {departments.map(dept => (
-                  <MenuItem key={dept} value={dept}>{dept}</MenuItem>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.map((user) => (
+                  <TableRow key={user.id} className="hover:bg-yellow-50/50">
+                    <TableCell>
+                      <div className="flex items-center space-x-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-yellow-100 text-yellow-600">
+                            {user.name.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{user.name}</p>
+                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                            <Mail className="h-3 w-3" />
+                            <span>{user.email}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getRoleColor(user.role) as any}>
+                        {getRoleLabel(user.role)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-1">
+                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                        <span>{user.department}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant={getStatusColor(user.status) as any}>
+                          {user.status.toUpperCase()}
+                        </Badge>
+                        <Switch
+                          checked={user.status === 'active'}
+                          onCheckedChange={() => handleStatusToggle(user.id)}
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm">
+                        {user.lastLogin === 'Never' ? 'Never' : new Date(user.lastLogin).toLocaleDateString()}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm">
+                        {new Date(user.createdDate).toLocaleDateString()}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Button size="sm" variant="ghost" className="text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={formData.status}
-                label="Status"
-                onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as User['status'] }))}
-              >
-                <MenuItem value="active">Active</MenuItem>
-                <MenuItem value="inactive">Inactive</MenuItem>
-                <MenuItem value="suspended">Suspended</MenuItem>
-              </Select>
-            </FormControl>
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button 
-            onClick={handleSaveUser}
-            variant="contained"
-            disabled={!formData.name || !formData.email || !formData.department}
-          >
-            {editingUser ? 'Update' : 'Create'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to delete user "{userToDelete?.name}"? This action cannot be undone.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button onClick={confirmDeleteUser} color="error" variant="contained">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };

@@ -1,44 +1,23 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  Chip,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
-  Toolbar,
-  Stack,
-  Paper,
-  Avatar,
-  Collapse
-} from '@mui/material';
-import {
-  Visibility,
-  CheckCircle,
-  Cancel,
-  FilterList,
-  Sort,
-  AttachFile,
-  ExpandMore,
-  ExpandLess
-} from '@mui/icons-material';
-import { RequestReviewModal } from './RequestReviewModal';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  CheckCircle2, 
+  X, 
+  Eye, 
+  Filter, 
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  DollarSign,
+  AlertTriangle,
+  Calendar
+} from 'lucide-react';
+import AOS from 'aos';
 
 interface PaymentRequest {
   id: string;
@@ -105,58 +84,40 @@ export const ApprovalsDashboard: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<string>('pending');
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('dueDate');
-  const [selectedRequest, setSelectedRequest] = useState<PaymentRequest | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [actionType, setActionType] = useState<'approve' | 'reject'>('approve');
-  const [comment, setComment] = useState('');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
-  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-out-cubic'
+    });
+  }, []);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'urgent': return 'error';
-      case 'high': return 'warning';
-      case 'medium': return 'info';
-      case 'low': return 'success';
+      case 'urgent': return 'destructive';
+      case 'high': return 'orange';
+      case 'medium': return 'blue';
+      case 'low': return 'green';
       default: return 'default';
     }
   };
 
   const getAmountColor = (amount: number) => {
-    if (amount > 10000) return 'error.main';
-    if (amount > 5000) return 'warning.main';
-    return 'text.primary';
+    if (amount > 10000) return 'text-red-600';
+    if (amount > 5000) return 'text-orange-600';
+    return 'text-foreground';
   };
 
   const handleAction = (request: PaymentRequest, action: 'approve' | 'reject') => {
-    // Auto-approved requests cannot be manually approved
-    if (request.amount < 2000 && action === 'approve') {
-      return;
-    }
-    setSelectedRequest(request);
-    setActionType(action);
-    setDialogOpen(true);
-  };
-
-  const handleViewRequest = (request: PaymentRequest) => {
-    setSelectedRequest(request);
-    setReviewModalOpen(true);
-  };
-
-  const confirmAction = () => {
-    if (selectedRequest) {
-      const newStatus = actionType === 'approve' ? 'approved' : 'rejected';
-      setRequests(prev => 
-        prev.map(req => 
-          req.id === selectedRequest.id 
-            ? { ...req, status: newStatus as any }
-            : req
-        )
-      );
-    }
-    setDialogOpen(false);
-    setComment('');
-    setSelectedRequest(null);
+    const newStatus = action === 'approve' ? 'approved' : 'rejected';
+    setRequests(prev => 
+      prev.map(req => 
+        req.id === request.id 
+          ? { ...req, status: newStatus as any }
+          : req
+      )
+    );
   };
 
   const toggleRowExpansion = (requestId: string) => {
@@ -183,265 +144,268 @@ export const ApprovalsDashboard: React.FC = () => {
     });
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
-        Approve Payment Requests
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Review and approve pending payment requests from your team
-      </Typography>
+    <div className="min-h-screen finance-bg-animated">
+      <div className="p-6 space-y-6">
+        <div data-aos="fade-down">
+          <h1 className="finance-heading text-yellow-600">Approve Payment Requests</h1>
+          <p className="text-muted-foreground">Review and approve pending payment requests from your team</p>
+        </div>
 
-      {/* Filters and Actions */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Toolbar sx={{ px: 0 }}>
-          <Stack direction="row" spacing={2} alignItems="center" sx={{ flexGrow: 1 }}>
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={filterStatus}
-                label="Status"
-                onChange={(e) => setFilterStatus(e.target.value)}
-              >
-                <MenuItem value="all">All Status</MenuItem>
-                <MenuItem value="pending">Pending</MenuItem>
-                <MenuItem value="approved">Approved</MenuItem>
-                <MenuItem value="rejected">Rejected</MenuItem>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6" data-aos="fade-up" data-aos-delay="100">
+          <Card className="finance-card">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-yellow-100 rounded-lg">
+                  <Clock className="h-6 w-6 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-yellow-600">
+                    {filteredRequests.filter(r => r.status === 'pending').length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Pending Approvals</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="finance-card">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-green-100 rounded-lg">
+                  <CheckCircle2 className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-green-600">
+                    {filteredRequests.filter(r => r.status === 'approved').length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Approved Today</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="finance-card">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-blue-100 rounded-lg">
+                  <DollarSign className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-blue-600">
+                    ${filteredRequests.reduce((sum, r) => sum + r.amount, 0).toLocaleString()}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Total Value</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="finance-card">
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-red-100 rounded-lg">
+                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-red-600">
+                    {filteredRequests.filter(r => r.priority === 'urgent').length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Urgent Requests</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters */}
+        <Card data-aos="fade-up" data-aos-delay="200">
+          <CardContent className="p-6">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center space-x-2">
+                <Filter className="h-4 w-4 text-yellow-600" />
+                <span className="text-sm font-medium">Filters:</span>
+              </div>
+              
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
               </Select>
-            </FormControl>
 
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Priority</InputLabel>
-              <Select
-                value={filterPriority}
-                label="Priority"
-                onChange={(e) => setFilterPriority(e.target.value)}
-              >
-                <MenuItem value="all">All Priority</MenuItem>
-                <MenuItem value="urgent">Urgent</MenuItem>
-                <MenuItem value="high">High</MenuItem>
-                <MenuItem value="medium">Medium</MenuItem>
-                <MenuItem value="low">Low</MenuItem>
+              <Select value={filterPriority} onValueChange={setFilterPriority}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Priority</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                </SelectContent>
               </Select>
-            </FormControl>
 
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Sort By</InputLabel>
-              <Select
-                value={sortBy}
-                label="Sort By"
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <MenuItem value="dueDate">Due Date</MenuItem>
-                <MenuItem value="amount">Amount</MenuItem>
-                <MenuItem value="priority">Priority</MenuItem>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-36">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="dueDate">Due Date</SelectItem>
+                  <SelectItem value="amount">Amount</SelectItem>
+                  <SelectItem value="priority">Priority</SelectItem>
+                </SelectContent>
               </Select>
-            </FormControl>
-          </Stack>
 
-          <Typography variant="body2" color="text.secondary">
-            {filteredRequests.length} requests found
-          </Typography>
-        </Toolbar>
-      </Paper>
+              <div className="ml-auto text-sm text-muted-foreground">
+                {filteredRequests.length} requests found
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Requests Table */}
-      <Card>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell></TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Request ID</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Employee</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Vendor</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Amount</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Priority</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Due Date</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredRequests.map((request) => (
-                <React.Fragment key={request.id}>
-                  <TableRow hover>
-                    <TableCell>
-                      <IconButton
-                        size="small"
-                        onClick={() => toggleRowExpansion(request.id)}
-                      >
-                        {expandedRows.has(request.id) ? <ExpandLess /> : <ExpandMore />}
-                      </IconButton>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={600}>
-                        {request.id}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Avatar sx={{ width: 32, height: 32, fontSize: '0.875rem' }}>
-                          {request.employeeName.split(' ').map(n => n[0]).join('')}
-                        </Avatar>
-                        <Typography variant="body2">{request.employeeName}</Typography>
-                      </Stack>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">{request.vendorName}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography 
-                        variant="body2" 
-                        fontWeight={600}
-                        color={getAmountColor(request.amount)}
-                      >
-                        {request.currency} {request.amount.toLocaleString()}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={request.priority.toUpperCase()} 
-                        color={getPriorityColor(request.priority) as any}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">
-                        {new Date(request.dueDate).toLocaleDateString()}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={request.status.toUpperCase()} 
-                        color={request.status === 'pending' ? 'warning' : request.status === 'approved' ? 'success' : 'error'}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Stack direction="row" spacing={1}>
-                        {request.status === 'pending' && (
-                          <>
-                            <Button
-                              size="small"
-                              startIcon={<CheckCircle />}
-                              color="success"
-                              variant="contained"
-                              onClick={() => handleAction(request, 'approve')}
-                              disabled={request.amount < 2000}
-                            >
-                              {request.amount < 2000 ? 'Auto-approved' : 'Approve'}
-                            </Button>
-                            <Button
-                              size="small"
-                              startIcon={<Cancel />}
-                              color="error"
-                              variant="outlined"
-                              onClick={() => handleAction(request, 'reject')}
-                            >
-                              Reject
-                            </Button>
-                          </>
-                        )}
-                        <IconButton 
-                          size="small" 
-                          color="primary"
-                          onClick={() => handleViewRequest(request)}
+        {/* Requests Table */}
+        <Card data-aos="fade-up" data-aos-delay="300">
+          <CardHeader>
+            <CardTitle className="text-yellow-600">Payment Requests</CardTitle>
+            <CardDescription>Review and take action on pending requests</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead></TableHead>
+                  <TableHead>Request ID</TableHead>
+                  <TableHead>Employee</TableHead>
+                  <TableHead>Vendor</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Priority</TableHead>
+                  <TableHead>Due Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredRequests.map((request) => (
+                  <React.Fragment key={request.id}>
+                    <TableRow className="hover:bg-yellow-50/50">
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleRowExpansion(request.id)}
                         >
-                          <Visibility />
-                        </IconButton>
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
+                          {expandedRows.has(request.id) ? 
+                            <ChevronUp className="h-4 w-4" /> : 
+                            <ChevronDown className="h-4 w-4" />
+                          }
+                        </Button>
+                      </TableCell>
+                      <TableCell className="font-medium">{request.id}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback>
+                              {request.employeeName.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span>{request.employeeName}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{request.vendorName}</TableCell>
+                      <TableCell className={getAmountColor(request.amount)}>
+                        <span className="font-semibold">
+                          {request.currency} {request.amount.toLocaleString()}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getPriorityColor(request.priority) as any}>
+                          {request.priority.toUpperCase()}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-1">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span>{new Date(request.dueDate).toLocaleDateString()}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={request.status === 'pending' ? 'secondary' : 
+                                       request.status === 'approved' ? 'default' : 'destructive'}>
+                          {request.status.toUpperCase()}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          {request.status === 'pending' && (
+                            <>
+                              <Button
+                                size="sm"
+                                className="finance-button-primary"
+                                onClick={() => handleAction(request, 'approve')}
+                                disabled={request.amount < 2000}
+                              >
+                                <CheckCircle2 className="h-4 w-4 mr-1" />
+                                {request.amount < 2000 ? 'Auto-approved' : 'Approve'}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-red-200 text-red-600 hover:bg-red-50"
+                                onClick={() => handleAction(request, 'reject')}
+                              >
+                                <X className="h-4 w-4 mr-1" />
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                          <Button size="sm" variant="ghost">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
 
-                  {/* Expanded Row Details */}
-                  <TableRow>
-                    <TableCell colSpan={9} sx={{ py: 0 }}>
-                      <Collapse in={expandedRows.has(request.id)} timeout="auto" unmountOnExit>
-                        <Box sx={{ p: 2, bgcolor: 'grey.50' }}>
-                          <Stack spacing={2}>
-                            <Typography variant="body2">
-                              <strong>Description:</strong> {request.description}
-                            </Typography>
-                            <Typography variant="body2">
-                              <strong>Category:</strong> {request.category}
-                            </Typography>
-                            <Box>
-                              <Typography variant="body2" sx={{ mb: 1 }}>
-                                <strong>Documents:</strong>
-                              </Typography>
-                              <Stack direction="row" spacing={1}>
+                    {/* Expanded Row Details */}
+                    {expandedRows.has(request.id) && (
+                      <TableRow>
+                        <TableCell colSpan={9} className="bg-yellow-50/30 p-6">
+                          <div className="space-y-4">
+                            <div>
+                              <h4 className="font-semibold text-yellow-700 mb-2">Description</h4>
+                              <p className="text-sm text-muted-foreground">{request.description}</p>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-yellow-700 mb-2">Category</h4>
+                              <Badge variant="outline">{request.category}</Badge>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-yellow-700 mb-2">Documents</h4>
+                              <div className="flex flex-wrap gap-2">
                                 {request.documents.map((doc, index) => (
-                                  <Chip
-                                    key={index}
-                                    icon={<AttachFile />}
-                                    label={doc}
-                                    size="small"
-                                    clickable
-                                    color="primary"
-                                    variant="outlined"
-                                  />
+                                  <Badge key={index} variant="secondary" className="cursor-pointer hover:bg-yellow-100">
+                                    {doc}
+                                  </Badge>
                                 ))}
-                              </Stack>
-                            </Box>
-                          </Stack>
-                        </Box>
-                      </Collapse>
-                    </TableCell>
-                  </TableRow>
-                </React.Fragment>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Card>
-
-      {/* Action Dialog */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {actionType === 'approve' ? 'Approve Request' : 'Reject Request'}
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            Request ID: {selectedRequest?.id}
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            Amount: {selectedRequest?.currency} {selectedRequest?.amount.toLocaleString()}
-          </Typography>
-          {selectedRequest && selectedRequest.amount >= 10000 && actionType === 'approve' && (
-            <Typography variant="body2" sx={{ mb: 3, color: 'warning.main' }}>
-              Note: This request requires dual approval (≥ $10,000)
-            </Typography>
-          )}
-          <TextField
-            label="Comment (Required)"
-            multiline
-            rows={4}
-            fullWidth
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            required
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button 
-            onClick={confirmAction}
-            color={actionType === 'approve' ? 'success' : 'error'}
-            variant="contained"
-            disabled={!comment.trim()}
-          >
-            {actionType === 'approve' ? 'Approve' : 'Reject'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Request Review Modal */}
-      <RequestReviewModal
-        open={reviewModalOpen}
-        onClose={() => setReviewModalOpen(false)}
-        request={selectedRequest}
-      />
-    </Box>
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
