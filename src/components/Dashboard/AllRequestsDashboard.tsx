@@ -1,40 +1,13 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
-  Chip,
-  IconButton,
-  Button,
-  Stack,
-  Paper,
-  Toolbar,
-  Avatar,
-  Pagination,
-  InputAdornment
-} from '@mui/material';
-import {
-  Search,
-  Visibility,
-  Download,
-  FilterList,
-  FileDownload
-} from '@mui/icons-material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import React, { useState, useEffect } from 'react';
+import AOS from 'aos';
+import { Search, Eye, Download, Calendar, Filter } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RequestReviewModal } from './RequestReviewModal';
 
 interface PaymentRequest {
@@ -151,29 +124,34 @@ export const AllRequestsDashboard: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [filterDepartment, setFilterDepartment] = useState<string>('all');
-  const [dateFrom, setDateFrom] = useState<Date | null>(null);
-  const [dateTo, setDateTo] = useState<Date | null>(null);
   const [page, setPage] = useState(1);
   const [selectedRequest, setSelectedRequest] = useState<PaymentRequest | null>(null);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
-  const getStatusColor = (status: string) => {
+  useEffect(() => {
+    AOS.init({
+      duration: 600,
+      easing: 'ease-out-cubic',
+      once: true,
+    });
+  }, []);
+
+  const getStatusVariant = (status: string) => {
     switch (status) {
-      case 'approved': return 'success';
-      case 'rejected': return 'error';
-      case 'pending': return 'warning';
-      case 'in_review': return 'info';
-      default: return 'default';
+      case 'approved': return 'default';
+      case 'rejected': return 'destructive';
+      case 'pending': return 'secondary';
+      default: return 'outline';
     }
   };
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityVariant = (priority: string) => {
     switch (priority) {
-      case 'urgent': return 'error';
-      case 'high': return 'warning';
-      case 'medium': return 'info';
-      case 'low': return 'success';
-      default: return 'default';
+      case 'urgent': return 'destructive';
+      case 'high': return 'secondary';
+      case 'medium': return 'outline';
+      case 'low': return 'default';
+      default: return 'outline';
     }
   };
 
@@ -187,13 +165,8 @@ export const AllRequestsDashboard: React.FC = () => {
     const matchesStatus = filterStatus === 'all' || request.status === filterStatus;
     const matchesCategory = filterCategory === 'all' || request.category === filterCategory;
     const matchesDepartment = filterDepartment === 'all' || request.department === filterDepartment;
-    
-    const submittedDate = new Date(request.submittedDate);
-    const matchesDateRange = 
-      (!dateFrom || submittedDate >= dateFrom) &&
-      (!dateTo || submittedDate <= dateTo);
 
-    return matchesSearch && matchesStatus && matchesCategory && matchesDepartment && matchesDateRange;
+    return matchesSearch && matchesStatus && matchesCategory && matchesDepartment;
   });
 
   const paginatedRequests = filteredRequests.slice(
@@ -239,225 +212,209 @@ export const AllRequestsDashboard: React.FC = () => {
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
+    <div className="p-6 space-y-6">
+      <div data-aos="fade-up">
+        <h1 className="text-3xl font-bold text-foreground mb-2">
           All Payment Requests
-        </Typography>
-        
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+        </h1>
+        <p className="text-muted-foreground mb-6">
           Complete overview of all payment requests across departments
-        </Typography>
+        </p>
+      </div>
 
-        {/* Search and Filters */}
-        <Paper sx={{ p: 2, mb: 3 }}>
-          <Stack spacing={2}>
-            {/* Search Bar */}
-            <TextField
+      {/* Search and Filters */}
+      <Card data-aos="fade-up" data-aos-delay="100">
+        <CardContent className="p-6 space-y-4">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
               placeholder="Search by ID, employee, vendor, or description..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search />
-                  </InputAdornment>
-                ),
-              }}
+              className="pl-10"
             />
+          </div>
 
-            {/* Filter Controls */}
-            <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
-              <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={filterStatus}
-                  label="Status"
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                >
-                  <MenuItem value="all">All Status</MenuItem>
-                  <MenuItem value="pending">Pending</MenuItem>
-                  <MenuItem value="approved">Approved</MenuItem>
-                  <MenuItem value="rejected">Rejected</MenuItem>
-                  
-                </Select>
-              </FormControl>
+          {/* Filter Controls */}
+          <div className="flex flex-wrap gap-3">
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-[130px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
 
-              <FormControl size="small" sx={{ minWidth: 140 }}>
-                <InputLabel>Category</InputLabel>
-                <Select
-                  value={filterCategory}
-                  label="Category"
-                  onChange={(e) => setFilterCategory(e.target.value)}
-                >
-                  <MenuItem value="all">All Categories</MenuItem>
-                  {uniqueCategories.map(category => (
-                    <MenuItem key={category} value={category}>{category}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <FormControl size="small" sx={{ minWidth: 140 }}>
-                <InputLabel>Department</InputLabel>
-                <Select
-                  value={filterDepartment}
-                  label="Department"
-                  onChange={(e) => setFilterDepartment(e.target.value)}
-                >
-                  <MenuItem value="all">All Departments</MenuItem>
-                  {uniqueDepartments.map(dept => (
-                    <MenuItem key={dept} value={dept}>{dept}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <DatePicker
-                label="From Date"
-                value={dateFrom}
-                onChange={setDateFrom}
-                slotProps={{ textField: { size: 'small', sx: { minWidth: 140 } } }}
-              />
-
-              <DatePicker
-                label="To Date"
-                value={dateTo}
-                onChange={setDateTo}
-                slotProps={{ textField: { size: 'small', sx: { minWidth: 140 } } }}
-              />
-
-              <Button
-                variant="outlined"
-                startIcon={<FileDownload />}
-                onClick={exportToCSV}
-                sx={{ height: 40 }}
-              >
-                Export CSV
-              </Button>
-            </Stack>
-
-            <Stack direction="row" justifyContent="between" alignItems="center">
-              <Typography variant="body2" color="text.secondary">
-                Showing {paginatedRequests.length} of {filteredRequests.length} requests
-              </Typography>
-            </Stack>
-          </Stack>
-        </Paper>
-
-        {/* Requests Table */}
-        <Card>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Request ID</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Employee</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Vendor</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Amount</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Category</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Department</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Priority</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Submitted</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedRequests.map((request) => (
-                  <TableRow key={request.id} hover>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={600}>
-                        {request.id}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Avatar sx={{ width: 32, height: 32, fontSize: '0.875rem' }}>
-                          {request.employeeName.split(' ').map(n => n[0]).join('')}
-                        </Avatar>
-                        <Box>
-                          <Typography variant="body2" fontWeight={500}>
-                            {request.employeeName}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {request.employeeId}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">{request.vendorName}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={600}>
-                        {request.currency} {request.amount.toLocaleString()}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">{request.category}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">{request.department}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={request.priority.toUpperCase()} 
-                        color={getPriorityColor(request.priority) as any}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={request.status.replace('_', ' ').toUpperCase()} 
-                        color={getStatusColor(request.status) as any}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">
-                        {new Date(request.submittedDate).toLocaleDateString()}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Stack direction="row" spacing={1}>
-                  <IconButton 
-                    size="small" 
-                    color="primary"
-                    onClick={() => handleViewRequest(request)}
-                  >
-                    <Visibility />
-                  </IconButton>
-                        <IconButton size="small" color="primary">
-                          <Download />
-                        </IconButton>
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
+            <Select value={filterCategory} onValueChange={setFilterCategory}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {uniqueCategories.map(category => (
+                  <SelectItem key={category} value={category}>{category}</SelectItem>
                 ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </SelectContent>
+            </Select>
+
+            <Select value={filterDepartment} onValueChange={setFilterDepartment}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Department" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Departments</SelectItem>
+                {uniqueDepartments.map(dept => (
+                  <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Button
+              variant="outline"
+              onClick={exportToCSV}
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Export CSV
+            </Button>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-muted-foreground">
+              Showing {paginatedRequests.length} of {filteredRequests.length} requests
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Requests Table */}
+      <Card data-aos="fade-up" data-aos-delay="200">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="font-semibold">Request ID</TableHead>
+                <TableHead className="font-semibold">Employee</TableHead>
+                <TableHead className="font-semibold">Vendor</TableHead>
+                <TableHead className="font-semibold">Amount</TableHead>
+                <TableHead className="font-semibold">Category</TableHead>
+                <TableHead className="font-semibold">Department</TableHead>
+                <TableHead className="font-semibold">Priority</TableHead>
+                <TableHead className="font-semibold">Status</TableHead>
+                <TableHead className="font-semibold">Submitted</TableHead>
+                <TableHead className="font-semibold">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedRequests.map((request, index) => (
+                <TableRow key={request.id} data-aos="fade-in" data-aos-delay={index * 50}>
+                  <TableCell>
+                    <span className="font-semibold text-foreground">
+                      {request.id}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-xs">
+                          {request.employeeName.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium text-foreground">
+                          {request.employeeName}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {request.employeeId}
+                        </div>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>{request.vendorName}</TableCell>
+                  <TableCell>
+                    <span className="font-semibold">
+                      {request.currency} {request.amount.toLocaleString()}
+                    </span>
+                  </TableCell>
+                  <TableCell>{request.category}</TableCell>
+                  <TableCell>{request.department}</TableCell>
+                  <TableCell>
+                    <Badge variant={getPriorityVariant(request.priority)}>
+                      {request.priority.toUpperCase()}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={getStatusVariant(request.status)}>
+                      {request.status.replace('_', ' ').toUpperCase()}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {new Date(request.submittedDate).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleViewRequest(request)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-              <Pagination
-                count={totalPages}
-                page={page}
-                onChange={(_, newPage) => setPage(newPage)}
-                color="primary"
-              />
-            </Box>
+            <div className="flex justify-center p-4 border-t">
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(page - 1)}
+                  disabled={page === 1}
+                >
+                  Previous
+                </Button>
+                <span className="flex items-center px-3 text-sm text-muted-foreground">
+                  Page {page} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(page + 1)}
+                  disabled={page === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
           )}
-        </Card>
+        </CardContent>
+      </Card>
 
-        {/* Request Review Modal */}
-        <RequestReviewModal
-          open={reviewModalOpen}
-          onClose={() => setReviewModalOpen(false)}
-          request={selectedRequest}
-        />
-      </Box>
-    </LocalizationProvider>
+      {/* Request Review Modal */}
+      <RequestReviewModal
+        open={reviewModalOpen}
+        onClose={() => setReviewModalOpen(false)}
+        request={selectedRequest}
+      />
+    </div>
   );
 };
