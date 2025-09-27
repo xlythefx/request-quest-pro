@@ -2,8 +2,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PlusCircle, Clock, CheckCircle2, XCircle, DollarSign, FileText } from 'lucide-react';
+import { useEffect } from 'react';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 export const EmployeeDashboard = () => {
+  useEffect(() => {
+    AOS.init({ duration: 600, once: true });
+  }, []);
   const recentRequests = [
     {
       id: 'REQ-001',
@@ -47,11 +53,11 @@ export const EmployeeDashboard = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 finance-bg-animated p-6 rounded-lg">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" data-aos="fade-down">
         <div>
-          <h1 className="finance-heading">Employee Dashboard</h1>
+          <h1 className="finance-heading text-finance-accent">Employee Dashboard</h1>
           <p className="text-muted-foreground">Manage your payment requests and track approvals</p>
         </div>
         <Button className="finance-button-accent">
@@ -61,7 +67,7 @@ export const EmployeeDashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" data-aos="fade-up">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
@@ -108,7 +114,7 @@ export const EmployeeDashboard = () => {
       </div>
 
       {/* Recent Requests */}
-      <Card>
+      <Card data-aos="fade-up" data-aos-delay="200">
         <CardHeader>
           <CardTitle>Recent Requests</CardTitle>
           <CardDescription>Your latest payment requests and their status</CardDescription>

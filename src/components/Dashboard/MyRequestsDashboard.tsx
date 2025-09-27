@@ -1,35 +1,14 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  Chip,
-  Tabs,
-  Tab,
-  Stack,
-  Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Divider,
-  IconButton
-} from '@mui/material';
-import {
-  Visibility,
-  Edit,
-  Send,
-  AttachFile,
-  Download
-} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
+import { Eye, Edit, Send, Paperclip, Download } from 'lucide-react';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 interface PaymentRequest {
   id: string;
@@ -87,273 +66,227 @@ const mockRequests: PaymentRequest[] = [
 ];
 
 export const MyRequestsDashboard: React.FC = () => {
-  const [currentTab, setCurrentTab] = useState(0);
+  const [currentTab, setCurrentTab] = useState('submitted');
   const [selectedRequest, setSelectedRequest] = useState<PaymentRequest | null>(null);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setCurrentTab(newValue);
-  };
+  useEffect(() => {
+    AOS.init({ duration: 600, once: true });
+  }, []);
 
   const filteredRequests = mockRequests.filter(req => {
-    if (currentTab === 0) return req.status !== 'draft'; // Submitted
-    return req.status === 'draft'; // Drafts
+    if (currentTab === 'submitted') return req.status !== 'draft';
+    return req.status === 'draft';
   });
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'highest': return 'error';
-      case 'high': return 'warning';
-      case 'low': return 'success';
-      default: return 'default';
+      case 'highest': return 'destructive';
+      case 'high': return 'secondary';
+      case 'low': return 'outline';
+      default: return 'outline';
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'approved': return 'success';
-      case 'pending': return 'warning';
-      case 'rejected': return 'error';
-      case 'draft': return 'info';
-      default: return 'default';
+      case 'approved':
+        return <Badge variant="secondary" className="bg-success/10 text-success border-success/20">Approved</Badge>;
+      case 'pending':
+        return <Badge variant="secondary" className="bg-warning/10 text-warning border-warning/20">Pending</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive">Rejected</Badge>;
+      case 'draft':
+        return <Badge variant="secondary" className="bg-finance-accent/10 text-finance-accent border-finance-accent/20">Draft</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
     }
-  };
-
-  const handleViewRequest = (request: PaymentRequest) => {
-    setSelectedRequest(request);
-    setViewDialogOpen(true);
   };
 
   const handleSubmitDraft = (requestId: string) => {
     console.log('Submitting draft:', requestId);
-    // Mock submission - in real app, this would update the status
   };
 
   const handleEditDraft = (requestId: string) => {
     console.log('Editing draft:', requestId);
-    // Mock edit - in real app, this would navigate to edit form
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
-        My Requests
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        View and manage your payment requests and drafts
-      </Typography>
+    <div className="space-y-6 finance-bg-animated p-6 rounded-lg">
+      <div className="mb-4" data-aos="fade-down">
+        <h1 className="finance-heading text-finance-accent">My Requests</h1>
+        <p className="text-muted-foreground">View and manage your payment requests and drafts</p>
+      </div>
 
-      {/* Tabs */}
-      <Paper sx={{ mb: 3 }}>
-        <Tabs value={currentTab} onChange={handleTabChange}>
-          <Tab label={`Submitted Requests (${mockRequests.filter(r => r.status !== 'draft').length})`} />
-          <Tab label={`Draft Requests (${mockRequests.filter(r => r.status === 'draft').length})`} />
-        </Tabs>
-      </Paper>
+      <Tabs value={currentTab} onValueChange={setCurrentTab} data-aos="fade-up">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="submitted">
+            Submitted Requests ({mockRequests.filter(r => r.status !== 'draft').length})
+          </TabsTrigger>
+          <TabsTrigger value="drafts">
+            Draft Requests ({mockRequests.filter(r => r.status === 'draft').length})
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Requests Table */}
-      <Card>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 600 }}>Request ID</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Vendor</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Amount</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Category</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Priority</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Last Modified</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredRequests.map((request) => (
-                <TableRow key={request.id} hover>
-                  <TableCell>
-                    <Typography variant="body2" fontWeight={600}>
-                      {request.id}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">{request.vendorName}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" fontWeight={600}>
-                      {request.currency} {request.amount.toLocaleString()}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">{request.category}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip 
-                      label={request.priority.toUpperCase()} 
-                      color={getPriorityColor(request.priority) as any}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Chip 
-                      label={request.status.toUpperCase()} 
-                      color={getStatusColor(request.status) as any}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {new Date(request.lastModified).toLocaleDateString()}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Stack direction="row" spacing={1}>
-                      <IconButton 
-                        size="small" 
-                        color="primary"
-                        onClick={() => handleViewRequest(request)}
-                      >
-                        <Visibility />
-                      </IconButton>
-                      {request.status === 'draft' && (
-                        <>
-                          <Button
-                            size="small"
-                            startIcon={<Edit />}
-                            onClick={() => handleEditDraft(request.id)}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            startIcon={<Send />}
-                            onClick={() => handleSubmitDraft(request.id)}
-                          >
-                            Submit
-                          </Button>
-                        </>
-                      )}
-                    </Stack>
-                  </TableCell>
+        <TabsContent value={currentTab} className="mt-6">
+          <Card data-aos="fade-up" data-aos-delay="200">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Request ID</TableHead>
+                  <TableHead>Vendor</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Priority</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Last Modified</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHeader>
+              <TableBody>
+                {filteredRequests.map((request) => (
+                  <TableRow key={request.id}>
+                    <TableCell className="font-medium">{request.id}</TableCell>
+                    <TableCell>{request.vendorName}</TableCell>
+                    <TableCell className="font-medium">
+                      {request.currency} {request.amount.toLocaleString()}
+                    </TableCell>
+                    <TableCell>{request.category}</TableCell>
+                    <TableCell>
+                      <Badge variant={getPriorityColor(request.priority)}>
+                        {request.priority.toUpperCase()}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{getStatusBadge(request.status)}</TableCell>
+                    <TableCell>
+                      {new Date(request.lastModified).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setSelectedRequest(request)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>Request Details - {selectedRequest?.id}</DialogTitle>
+                            </DialogHeader>
+                            {selectedRequest && (
+                              <div className="space-y-4">
+                                <div>
+                                  <h3 className="text-lg font-semibold text-finance-accent mb-3">Basic Information</h3>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Vendor:</span>
+                                      <span className="font-medium">{selectedRequest.vendorName}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Amount:</span>
+                                      <span className="font-medium">
+                                        {selectedRequest.currency} {selectedRequest.amount.toLocaleString()}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Category:</span>
+                                      <span>{selectedRequest.category}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Priority:</span>
+                                      <Badge variant={getPriorityColor(selectedRequest.priority)}>
+                                        {selectedRequest.priority.toUpperCase()}
+                                      </Badge>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Status:</span>
+                                      {getStatusBadge(selectedRequest.status)}
+                                    </div>
+                                    {selectedRequest.submittedDate && (
+                                      <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Submitted:</span>
+                                        <span>{new Date(selectedRequest.submittedDate).toLocaleDateString()}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
 
-        {filteredRequests.length === 0 && (
-          <Box sx={{ textAlign: 'center', py: 6 }}>
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              {currentTab === 0 ? 'No submitted requests found' : 'No draft requests found'}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {currentTab === 0 
-                ? 'You haven\'t submitted any payment requests yet.' 
-                : 'You don\'t have any draft requests saved.'}
-            </Typography>
-          </Box>
-        )}
-      </Card>
+                                <Separator />
 
-      {/* View Request Dialog */}
-      <Dialog 
-        open={viewDialogOpen} 
-        onClose={() => setViewDialogOpen(false)} 
-        maxWidth="md" 
-        fullWidth
-      >
-        <DialogTitle>
-          Request Details - {selectedRequest?.id}
-        </DialogTitle>
-        <DialogContent>
-          {selectedRequest && (
-            <Stack spacing={3}>
-              {/* Basic Information */}
-              <Box>
-                <Typography variant="h6" gutterBottom>Basic Information</Typography>
-                <Stack spacing={2}>
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">Vendor:</Typography>
-                    <Typography variant="body2" fontWeight={600}>{selectedRequest.vendorName}</Typography>
-                  </Stack>
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">Amount:</Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {selectedRequest.currency} {selectedRequest.amount.toLocaleString()}
-                    </Typography>
-                  </Stack>
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">Category:</Typography>
-                    <Typography variant="body2">{selectedRequest.category}</Typography>
-                  </Stack>
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">Priority:</Typography>
-                    <Chip 
-                      label={selectedRequest.priority.toUpperCase()} 
-                      color={getPriorityColor(selectedRequest.priority) as any}
-                      size="small"
-                    />
-                  </Stack>
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography variant="body2" color="text.secondary">Status:</Typography>
-                    <Chip 
-                      label={selectedRequest.status.toUpperCase()} 
-                      color={getStatusColor(selectedRequest.status) as any}
-                      size="small"
-                    />
-                  </Stack>
-                  {selectedRequest.submittedDate && (
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography variant="body2" color="text.secondary">Submitted:</Typography>
-                      <Typography variant="body2">
-                        {new Date(selectedRequest.submittedDate).toLocaleDateString()}
-                      </Typography>
-                    </Stack>
-                  )}
-                </Stack>
-              </Box>
+                                <div>
+                                  <h3 className="text-lg font-semibold text-finance-accent mb-3">Description</h3>
+                                  <p className="text-muted-foreground">{selectedRequest.description}</p>
+                                </div>
 
-              <Divider />
+                                <Separator />
 
-              {/* Description */}
-              <Box>
-                <Typography variant="h6" gutterBottom>Description</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {selectedRequest.description}
-                </Typography>
-              </Box>
+                                <div>
+                                  <h3 className="text-lg font-semibold text-finance-accent mb-3">Attachments</h3>
+                                  {selectedRequest.documents.length > 0 ? (
+                                    <div className="space-y-2">
+                                      {selectedRequest.documents.map((doc, index) => (
+                                        <div key={index} className="flex items-center justify-between p-2 border rounded">
+                                          <div className="flex items-center gap-2">
+                                            <Paperclip className="w-4 h-4" />
+                                            <span>{doc}</span>
+                                          </div>
+                                          <Button size="sm" variant="ghost">
+                                            <Download className="w-4 h-4" />
+                                          </Button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <p className="text-muted-foreground">No attachments</p>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </DialogContent>
+                        </Dialog>
+                        {request.status === 'draft' && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleEditDraft(request.id)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="finance-button-accent"
+                              onClick={() => handleSubmitDraft(request.id)}
+                            >
+                              <Send className="w-4 h-4" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
 
-              <Divider />
-
-              {/* Documents */}
-              <Box>
-                <Typography variant="h6" gutterBottom>Attachments</Typography>
-                {selectedRequest.documents.length > 0 ? (
-                  <Stack spacing={1}>
-                    {selectedRequest.documents.map((doc, index) => (
-                      <Stack key={index} direction="row" alignItems="center" spacing={1}>
-                        <AttachFile fontSize="small" />
-                        <Typography variant="body2" sx={{ flex: 1 }}>{doc}</Typography>
-                        <IconButton size="small">
-                          <Download fontSize="small" />
-                        </IconButton>
-                      </Stack>
-                    ))}
-                  </Stack>
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    No attachments
-                  </Typography>
-                )}
-              </Box>
-            </Stack>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setViewDialogOpen(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+            {filteredRequests.length === 0 && (
+              <div className="text-center py-8">
+                <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                  {currentTab === 'submitted' ? 'No submitted requests found' : 'No draft requests found'}
+                </h3>
+                <p className="text-muted-foreground">
+                  {currentTab === 'submitted' 
+                    ? 'You haven\'t submitted any payment requests yet.' 
+                    : 'You don\'t have any draft requests saved.'}
+                </p>
+              </div>
+            )}
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };

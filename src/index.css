@@ -26,17 +26,17 @@
     --secondary: 44 94% 58%;
     --secondary-foreground: 0 0% 0%;
 
-    /* Finance Accent - Red-Orange */
-    --finance-accent: 14 91% 54%;
+    /* Finance Accent - Yellow */
+    --finance-accent: 45 93% 58%;
     --finance-accent-foreground: 0 0% 100%;
-    --finance-accent-hover: 14 91% 48%;
+    --finance-accent-hover: 45 93% 52%;
 
     /* Status Colors */
     --success: 171 42% 56%;
     --success-foreground: 0 0% 100%;
     --warning: 44 94% 58%;
     --warning-foreground: 0 0% 0%;
-    --destructive: 14 91% 54%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
     /* Neutral Palette */
@@ -54,7 +54,7 @@
     --radius: 0.75rem;
 
     /* Finance-specific Gradients */
-    --gradient-finance: linear-gradient(135deg, hsl(171 42% 56%), hsl(14 91% 54%));
+    --gradient-finance: linear-gradient(135deg, hsl(171 42% 56%), hsl(45 93% 58%));
     --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(0 0% 98%));
     --gradient-success: linear-gradient(135deg, hsl(171 42% 56%), hsl(171 42% 50%));
 
@@ -104,7 +104,7 @@
     --accent: 0 0% 15%;
     --accent-foreground: 0 0% 98%;
 
-    --destructive: 14 91% 54%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 0 0% 20%;
@@ -175,5 +175,18 @@
 
   .finance-button-accent:hover {
     background: hsl(var(--finance-accent-hover));
+  }
+
+  /* Background Animation */
+  .finance-bg-animated {
+    background: linear-gradient(-45deg, hsl(var(--background)), hsl(var(--muted)/0.5), hsl(var(--finance-accent)/0.1), hsl(var(--background)));
+    background-size: 400% 400%;
+    animation: gradient-shift 15s ease infinite;
+  }
+
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
 }

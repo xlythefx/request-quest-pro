@@ -2,8 +2,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, CheckCircle2, Clock, DollarSign, FileText, TrendingUp, Users } from 'lucide-react';
+import { useEffect } from 'react';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 export const ManagementDashboard = () => {
+  useEffect(() => {
+    AOS.init({ duration: 600, once: true });
+  }, []);
   const pendingApprovals = [
     {
       id: 'REQ-104',
@@ -61,11 +67,11 @@ export const ManagementDashboard = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 finance-bg-animated p-6 rounded-lg">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" data-aos="fade-down">
         <div>
-          <h1 className="finance-heading">Management Dashboard</h1>
+          <h1 className="finance-heading text-finance-accent">Management Dashboard</h1>
           <p className="text-muted-foreground">Review pending approvals and monitor payment workflows</p>
         </div>
         <div className="flex gap-2">

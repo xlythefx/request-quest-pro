@@ -1,40 +1,18 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Stack,
-  Switch,
-  FormControlLabel,
-  TextField,
-  Button,
-  Divider,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Slider,
-  Alert,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip
-} from '@mui/material';
-import {
-  Security,
-  Lock,
-  Shield,
-  Warning,
-  Save,
-  VpnKey,
-  AccountBalance,
-  Visibility
-} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Slider } from '@/components/ui/slider';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Shield, Lock, Eye, Database, Save, AlertTriangle } from 'lucide-react';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 interface SecurityEvent {
   id: string;
@@ -78,7 +56,6 @@ const mockSecurityEvents: SecurityEvent[] = [
 
 export const SecuritySettingsDashboard: React.FC = () => {
   const [securityConfig, setSecurityConfig] = useState({
-    // Password Policy
     passwordMinLength: 8,
     passwordRequireUppercase: true,
     passwordRequireLowercase: true,
@@ -86,38 +63,27 @@ export const SecuritySettingsDashboard: React.FC = () => {
     passwordRequireSpecialChars: true,
     passwordHistoryCheck: 5,
     passwordExpiryDays: 90,
-    
-    // Account Security
     maxLoginAttempts: 3,
     accountLockoutDuration: 30,
     sessionTimeout: 60,
     forcePasswordChangeOnFirstLogin: true,
-    
-    // Multi-Factor Authentication
     enableMFA: false,
     mfaRequired: false,
-    mfaMethods: ['email', 'sms'],
-    
-    // Audit & Monitoring
     enableAuditLogging: true,
     enableRealTimeMonitoring: true,
     enableFailedLoginNotifications: true,
     enablePermissionChangeNotifications: true,
-    
-    // IP & Access Control
-    enableIPWhitelisting: false,
-    allowedIPs: [],
-    enableGeoBlocking: false,
-    blockedCountries: [],
-    
-    // Data Protection
     enableDataEncryption: true,
     encryptionLevel: 'AES-256',
     enableBackupEncryption: true,
-    dataRetentionDays: 2555 // 7 years
+    dataRetentionDays: 2555
   });
 
   const [hasChanges, setHasChanges] = useState(false);
+
+  useEffect(() => {
+    AOS.init({ duration: 600, once: true });
+  }, []);
 
   const updateConfig = (field: string, value: any) => {
     setSecurityConfig(prev => ({ ...prev, [field]: value }));
@@ -125,416 +91,337 @@ export const SecuritySettingsDashboard: React.FC = () => {
   };
 
   const handleSave = () => {
-    // Mock save functionality
     console.log('Saving security configuration:', securityConfig);
     setHasChanges(false);
   };
 
-  const getSeverityColor = (severity: string) => {
+  const getSeverityBadge = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'error';
-      case 'high': return 'error';
-      case 'medium': return 'warning';
-      case 'low': return 'info';
-      default: return 'default';
+      case 'critical':
+        return <Badge variant="destructive">Critical</Badge>;
+      case 'high':
+        return <Badge variant="destructive">High</Badge>;
+      case 'medium':
+        return <Badge variant="secondary" className="bg-warning/10 text-warning border-warning/20">Medium</Badge>;
+      case 'low':
+        return <Badge variant="outline">Low</Badge>;
+      default:
+        return <Badge variant="outline">{severity}</Badge>;
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'active': return 'error';
-      case 'investigating': return 'warning';
-      case 'resolved': return 'success';
-      default: return 'default';
+      case 'active':
+        return <Badge variant="destructive">Active</Badge>;
+      case 'investigating':
+        return <Badge variant="secondary" className="bg-warning/10 text-warning border-warning/20">Investigating</Badge>;
+      case 'resolved':
+        return <Badge variant="secondary" className="bg-success/10 text-success border-success/20">Resolved</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
-        Security Settings
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Configure security policies, monitoring, and access controls
-      </Typography>
+    <div className="space-y-6 finance-bg-animated p-6 rounded-lg">
+      <div className="mb-4" data-aos="fade-down">
+        <h1 className="finance-heading text-finance-accent">Security Settings</h1>
+        <p className="text-muted-foreground">Configure security policies, monitoring, and access controls</p>
+      </div>
 
       {/* Save Actions */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
-          <Alert severity="info" sx={{ flex: 1 }}>
-            Changes to security settings will affect all users immediately upon saving.
+      <Card className="p-4" data-aos="fade-up">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Changes to security settings will affect all users immediately upon saving.
+            </AlertDescription>
           </Alert>
           <Button
-            variant="contained"
-            startIcon={<Save />}
             onClick={handleSave}
             disabled={!hasChanges}
+            className="finance-button-accent"
           >
+            <Save className="w-4 h-4 mr-2" />
             Save Security Settings
           </Button>
-        </Stack>
-      </Paper>
+        </div>
+      </Card>
 
-      <Stack spacing={3}>
+      <div className="space-y-6">
         {/* Password Policy */}
-        <Card>
-          <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-              <Lock color="primary" />
-              <Typography variant="h6" fontWeight={600}>
-                Password Policy
-              </Typography>
-            </Stack>
+        <Card data-aos="fade-up" data-aos-delay="100">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-finance-accent">
+              <Lock className="w-5 h-5" />
+              Password Policy
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+              <Label className="text-base font-medium">
+                Minimum Password Length: {securityConfig.passwordMinLength} characters
+              </Label>
+              <Slider
+                value={[securityConfig.passwordMinLength]}
+                onValueChange={(value) => updateConfig('passwordMinLength', value[0])}
+                min={6}
+                max={20}
+                step={1}
+                className="mt-2"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                <span>6</span>
+                <span>8</span>
+                <span>12</span>
+                <span>16</span>
+                <span>20</span>
+              </div>
+            </div>
 
-            <Stack spacing={3}>
-              <Box>
-                <Typography gutterBottom>
-                  Minimum Password Length: {securityConfig.passwordMinLength} characters
-                </Typography>
-                <Slider
-                  value={securityConfig.passwordMinLength}
-                  onChange={(_, value) => updateConfig('passwordMinLength', value)}
-                  min={6}
-                  max={20}
-                  step={1}
-                  marks={[
-                    { value: 6, label: '6' },
-                    { value: 8, label: '8' },
-                    { value: 12, label: '12' },
-                    { value: 16, label: '16' },
-                    { value: 20, label: '20' }
-                  ]}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={securityConfig.passwordRequireUppercase}
+                  onCheckedChange={(checked) => updateConfig('passwordRequireUppercase', checked)}
                 />
-              </Box>
+                <Label>Require uppercase letters</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={securityConfig.passwordRequireLowercase}
+                  onCheckedChange={(checked) => updateConfig('passwordRequireLowercase', checked)}
+                />
+                <Label>Require lowercase letters</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={securityConfig.passwordRequireNumbers}
+                  onCheckedChange={(checked) => updateConfig('passwordRequireNumbers', checked)}
+                />
+                <Label>Require numbers</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={securityConfig.passwordRequireSpecialChars}
+                  onCheckedChange={(checked) => updateConfig('passwordRequireSpecialChars', checked)}
+                />
+                <Label>Require special characters</Label>
+              </div>
+            </div>
 
-              <Stack spacing={2}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={securityConfig.passwordRequireUppercase}
-                      onChange={(e) => updateConfig('passwordRequireUppercase', e.target.checked)}
-                    />
-                  }
-                  label="Require uppercase letters"
-                />
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={securityConfig.passwordRequireLowercase}
-                      onChange={(e) => updateConfig('passwordRequireLowercase', e.target.checked)}
-                    />
-                  }
-                  label="Require lowercase letters"
-                />
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={securityConfig.passwordRequireNumbers}
-                      onChange={(e) => updateConfig('passwordRequireNumbers', e.target.checked)}
-                    />
-                  }
-                  label="Require numbers"
-                />
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={securityConfig.passwordRequireSpecialChars}
-                      onChange={(e) => updateConfig('passwordRequireSpecialChars', e.target.checked)}
-                    />
-                  }
-                  label="Require special characters"
-                />
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={securityConfig.forcePasswordChangeOnFirstLogin}
-                      onChange={(e) => updateConfig('forcePasswordChangeOnFirstLogin', e.target.checked)}
-                    />
-                  }
-                  label="Force password change on first login"
-                />
-              </Stack>
-
-              <Stack direction="row" spacing={2}>
-                <TextField
-                  label="Password History Check"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="passwordHistory">Password History Check</Label>
+                <Input
+                  id="passwordHistory"
                   type="number"
                   value={securityConfig.passwordHistoryCheck}
                   onChange={(e) => updateConfig('passwordHistoryCheck', parseInt(e.target.value))}
-                  helperText="Prevent reusing last N passwords"
-                  sx={{ maxWidth: 200 }}
+                  className="mt-1"
                 />
-                <TextField
-                  label="Password Expiry (days)"
+                <p className="text-xs text-muted-foreground mt-1">Prevent reusing last N passwords</p>
+              </div>
+              <div>
+                <Label htmlFor="passwordExpiry">Password Expiry (days)</Label>
+                <Input
+                  id="passwordExpiry"
                   type="number"
                   value={securityConfig.passwordExpiryDays}
                   onChange={(e) => updateConfig('passwordExpiryDays', parseInt(e.target.value))}
-                  helperText="0 = never expires"
-                  sx={{ maxWidth: 200 }}
+                  className="mt-1"
                 />
-              </Stack>
-            </Stack>
+                <p className="text-xs text-muted-foreground mt-1">0 = never expires</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         {/* Account Security */}
-        <Card>
+        <Card data-aos="fade-up" data-aos-delay="200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-finance-accent">
+              <Shield className="w-5 h-5" />
+              Account Security
+            </CardTitle>
+          </CardHeader>
           <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-              <Shield color="primary" />
-              <Typography variant="h6" fontWeight={600}>
-                Account Security
-              </Typography>
-            </Stack>
-
-            <Stack spacing={3}>
-              <Stack direction="row" spacing={2}>
-                <TextField
-                  label="Max Login Attempts"
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="maxLoginAttempts">Max Login Attempts</Label>
+                <Input
+                  id="maxLoginAttempts"
                   type="number"
                   value={securityConfig.maxLoginAttempts}
                   onChange={(e) => updateConfig('maxLoginAttempts', parseInt(e.target.value))}
-                  inputProps={{ min: 1, max: 10 }}
-                  sx={{ maxWidth: 200 }}
+                  className="mt-1"
                 />
-                <TextField
-                  label="Account Lockout Duration (minutes)"
+              </div>
+              <div>
+                <Label htmlFor="lockoutDuration">Account Lockout Duration (minutes)</Label>
+                <Input
+                  id="lockoutDuration"
                   type="number"
                   value={securityConfig.accountLockoutDuration}
                   onChange={(e) => updateConfig('accountLockoutDuration', parseInt(e.target.value))}
-                  sx={{ maxWidth: 250 }}
+                  className="mt-1"
                 />
-                <TextField
-                  label="Session Timeout (minutes)"
+              </div>
+              <div>
+                <Label htmlFor="sessionTimeout">Session Timeout (minutes)</Label>
+                <Input
+                  id="sessionTimeout"
                   type="number"
                   value={securityConfig.sessionTimeout}
                   onChange={(e) => updateConfig('sessionTimeout', parseInt(e.target.value))}
-                  sx={{ maxWidth: 200 }}
+                  className="mt-1"
                 />
-              </Stack>
-            </Stack>
-          </CardContent>
-        </Card>
-
-        {/* Multi-Factor Authentication */}
-        <Card>
-          <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-              <VpnKey color="primary" />
-              <Typography variant="h6" fontWeight={600}>
-                Multi-Factor Authentication
-              </Typography>
-            </Stack>
-
-            <Stack spacing={3}>
-              <Stack spacing={2}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={securityConfig.enableMFA}
-                      onChange={(e) => updateConfig('enableMFA', e.target.checked)}
-                    />
-                  }
-                  label="Enable Multi-Factor Authentication"
-                />
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={securityConfig.mfaRequired}
-                      onChange={(e) => updateConfig('mfaRequired', e.target.checked)}
-                      disabled={!securityConfig.enableMFA}
-                    />
-                  }
-                  label="Require MFA for all users"
-                />
-              </Stack>
-
-              {securityConfig.enableMFA && (
-                <Alert severity="warning">
-                  MFA setup will be required for all users on their next login.
-                </Alert>
-              )}
-            </Stack>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         {/* Audit & Monitoring */}
-        <Card>
+        <Card data-aos="fade-up" data-aos-delay="300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-finance-accent">
+              <Eye className="w-5 h-5" />
+              Audit & Monitoring
+            </CardTitle>
+          </CardHeader>
           <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-              <Visibility color="primary" />
-              <Typography variant="h6" fontWeight={600}>
-                Audit & Monitoring
-              </Typography>
-            </Stack>
-
-            <Stack spacing={2}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={securityConfig.enableAuditLogging}
-                    onChange={(e) => updateConfig('enableAuditLogging', e.target.checked)}
-                  />
-                }
-                label="Enable audit logging"
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={securityConfig.enableRealTimeMonitoring}
-                    onChange={(e) => updateConfig('enableRealTimeMonitoring', e.target.checked)}
-                  />
-                }
-                label="Enable real-time security monitoring"
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={securityConfig.enableFailedLoginNotifications}
-                    onChange={(e) => updateConfig('enableFailedLoginNotifications', e.target.checked)}
-                  />
-                }
-                label="Send notifications for failed login attempts"
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={securityConfig.enablePermissionChangeNotifications}
-                    onChange={(e) => updateConfig('enablePermissionChangeNotifications', e.target.checked)}
-                  />
-                }
-                label="Send notifications for permission changes"
-              />
-            </Stack>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={securityConfig.enableAuditLogging}
+                  onCheckedChange={(checked) => updateConfig('enableAuditLogging', checked)}
+                />
+                <Label>Enable audit logging</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={securityConfig.enableRealTimeMonitoring}
+                  onCheckedChange={(checked) => updateConfig('enableRealTimeMonitoring', checked)}
+                />
+                <Label>Enable real-time security monitoring</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={securityConfig.enableFailedLoginNotifications}
+                  onCheckedChange={(checked) => updateConfig('enableFailedLoginNotifications', checked)}
+                />
+                <Label>Send notifications for failed login attempts</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={securityConfig.enablePermissionChangeNotifications}
+                  onCheckedChange={(checked) => updateConfig('enablePermissionChangeNotifications', checked)}
+                />
+                <Label>Send notifications for permission changes</Label>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         {/* Data Protection */}
-        <Card>
+        <Card data-aos="fade-up" data-aos-delay="400">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-finance-accent">
+              <Database className="w-5 h-5" />
+              Data Protection
+            </CardTitle>
+          </CardHeader>
           <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-              <AccountBalance color="primary" />
-              <Typography variant="h6" fontWeight={600}>
-                Data Protection
-              </Typography>
-            </Stack>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={securityConfig.enableDataEncryption}
+                    onCheckedChange={(checked) => updateConfig('enableDataEncryption', checked)}
+                  />
+                  <Label>Enable data encryption at rest</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={securityConfig.enableBackupEncryption}
+                    onCheckedChange={(checked) => updateConfig('enableBackupEncryption', checked)}
+                  />
+                  <Label>Enable backup encryption</Label>
+                </div>
+              </div>
 
-            <Stack spacing={3}>
-              <Stack spacing={2}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={securityConfig.enableDataEncryption}
-                      onChange={(e) => updateConfig('enableDataEncryption', e.target.checked)}
-                    />
-                  }
-                  label="Enable data encryption at rest"
-                />
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={securityConfig.enableBackupEncryption}
-                      onChange={(e) => updateConfig('enableBackupEncryption', e.target.checked)}
-                    />
-                  }
-                  label="Enable backup encryption"
-                />
-              </Stack>
-
-              <Stack direction="row" spacing={2}>
-                <FormControl sx={{ minWidth: 200 }}>
-                  <InputLabel>Encryption Level</InputLabel>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Encryption Level</Label>
                   <Select
                     value={securityConfig.encryptionLevel}
-                    label="Encryption Level"
-                    onChange={(e) => updateConfig('encryptionLevel', e.target.value)}
+                    onValueChange={(value) => updateConfig('encryptionLevel', value)}
                   >
-                    <MenuItem value="AES-128">AES-128</MenuItem>
-                    <MenuItem value="AES-256">AES-256</MenuItem>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="AES-128">AES-128</SelectItem>
+                      <SelectItem value="AES-256">AES-256</SelectItem>
+                    </SelectContent>
                   </Select>
-                </FormControl>
-
-                <TextField
-                  label="Data Retention (days)"
-                  type="number"
-                  value={securityConfig.dataRetentionDays}
-                  onChange={(e) => updateConfig('dataRetentionDays', parseInt(e.target.value))}
-                  helperText="Legal requirement: 7 years (2555 days)"
-                  sx={{ maxWidth: 250 }}
-                />
-              </Stack>
-            </Stack>
+                </div>
+                <div>
+                  <Label htmlFor="dataRetention">Data Retention (days)</Label>
+                  <Input
+                    id="dataRetention"
+                    type="number"
+                    value={securityConfig.dataRetentionDays}
+                    onChange={(e) => updateConfig('dataRetentionDays', parseInt(e.target.value))}
+                    className="mt-1"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Legal requirement: 7 years (2555 days)</p>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         {/* Security Events */}
-        <Card>
+        <Card data-aos="fade-up" data-aos-delay="500">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-finance-accent">
+              <AlertTriangle className="w-5 h-5" />
+              Recent Security Events
+            </CardTitle>
+          </CardHeader>
           <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-              <Warning color="primary" />
-              <Typography variant="h6" fontWeight={600}>
-                Recent Security Events
-              </Typography>
-            </Stack>
-
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Event ID</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>User</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Description</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Timestamp</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Severity</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Event ID</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>User</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Timestamp</TableHead>
+                  <TableHead>Severity</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mockSecurityEvents.map((event) => (
+                  <TableRow key={event.id}>
+                    <TableCell className="font-medium">{event.id}</TableCell>
+                    <TableCell>{event.type.replace('_', ' ')}</TableCell>
+                    <TableCell>{event.user}</TableCell>
+                    <TableCell>{event.description}</TableCell>
+                    <TableCell>{event.timestamp}</TableCell>
+                    <TableCell>{getSeverityBadge(event.severity)}</TableCell>
+                    <TableCell>{getStatusBadge(event.status)}</TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {mockSecurityEvents.map((event) => (
-                    <TableRow key={event.id} hover>
-                      <TableCell>
-                        <Typography variant="body2" fontWeight={600}>
-                          {event.id}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {event.type.replace('_', ' ').toUpperCase()}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">{event.user}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">{event.description}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">{event.timestamp}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Chip 
-                          label={event.severity.toUpperCase()} 
-                          color={getSeverityColor(event.severity) as any}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Chip 
-                          label={event.status.toUpperCase()} 
-                          color={getStatusColor(event.status) as any}
-                          size="small"
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
-      </Stack>
-    </Box>
+      </div>
+    </div>
   );
 };

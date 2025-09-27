@@ -1,34 +1,11 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Stack,
-  Button,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Paper,
-  Chip
-} from '@mui/material';
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer
-} from 'recharts';
-import { FileDownload, TrendingUp, Analytics } from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { FileDown, TrendingUp, BarChart3 } from 'lucide-react';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 const monthlyData = [
   { month: 'Jan', payments: 45, amount: 125000, avgTime: 2.3 },
@@ -55,20 +32,15 @@ const approvalTimeData = [
   { department: 'HR', avgTime: 2.8, requests: 22 }
 ];
 
-const departmentSpendingData = [
-  { department: 'IT', Q1: 85000, Q2: 92000, Q3: 78000, Q4: 95000 },
-  { department: 'Sales', Q1: 45000, Q2: 52000, Q3: 48000, Q4: 55000 },
-  { department: 'Marketing', Q1: 32000, Q2: 38000, Q3: 35000, Q4: 42000 },
-  { department: 'Operations', Q1: 28000, Q2: 31000, Q3: 29000, Q4: 33000 },
-  { department: 'HR', Q1: 18000, Q2: 22000, Q3: 20000, Q4: 24000 }
-];
-
 export const ReportsDashboard: React.FC = () => {
   const [timeRange, setTimeRange] = useState('6months');
   const [reportType, setReportType] = useState('all');
 
+  useEffect(() => {
+    AOS.init({ duration: 600, once: true });
+  }, []);
+
   const generateReport = () => {
-    // Mock report generation
     const reportData = {
       totalPayments: monthlyData.reduce((sum, item) => sum + item.payments, 0),
       totalAmount: monthlyData.reduce((sum, item) => sum + item.amount, 0),
@@ -88,139 +60,102 @@ export const ReportsDashboard: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
-        Reports & Analytics
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Comprehensive financial analytics and reporting dashboard
-      </Typography>
+    <div className="space-y-6 finance-bg-animated p-6 rounded-lg">
+      <div className="mb-4" data-aos="fade-down">
+        <h1 className="finance-heading text-finance-accent">Reports & Analytics</h1>
+        <p className="text-muted-foreground">Comprehensive financial analytics and reporting dashboard</p>
+      </div>
 
       {/* Controls */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
-          <Stack direction="row" spacing={2}>
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel>Time Range</InputLabel>
-              <Select
-                value={timeRange}
-                label="Time Range"
-                onChange={(e) => setTimeRange(e.target.value)}
-              >
-                <MenuItem value="3months">Last 3 Months</MenuItem>
-                <MenuItem value="6months">Last 6 Months</MenuItem>
-                <MenuItem value="1year">Last Year</MenuItem>
-                <MenuItem value="2years">Last 2 Years</MenuItem>
-              </Select>
-            </FormControl>
+      <Card className="p-4" data-aos="fade-up">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Select value={timeRange} onValueChange={setTimeRange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select time range" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="3months">Last 3 Months</SelectItem>
+                <SelectItem value="6months">Last 6 Months</SelectItem>
+                <SelectItem value="1year">Last Year</SelectItem>
+                <SelectItem value="2years">Last 2 Years</SelectItem>
+              </SelectContent>
+            </Select>
 
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel>Report Type</InputLabel>
-              <Select
-                value={reportType}
-                label="Report Type"
-                onChange={(e) => setReportType(e.target.value)}
-              >
-                <MenuItem value="all">All Reports</MenuItem>
-                <MenuItem value="payments">Payment Volume</MenuItem>
-                <MenuItem value="approval">Approval Times</MenuItem>
-                <MenuItem value="spending">Department Spending</MenuItem>
-              </Select>
-            </FormControl>
-          </Stack>
+            <Select value={reportType} onValueChange={setReportType}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select report type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Reports</SelectItem>
+                <SelectItem value="payments">Payment Volume</SelectItem>
+                <SelectItem value="approval">Approval Times</SelectItem>
+                <SelectItem value="spending">Department Spending</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-          <Button
-            variant="contained"
-            startIcon={<FileDownload />}
-            onClick={generateReport}
-          >
+          <Button onClick={generateReport} className="finance-button-accent">
+            <FileDown className="w-4 h-4 mr-2" />
             Generate Report
           </Button>
-        </Stack>
-      </Paper>
+        </div>
+      </Card>
 
       {/* Key Metrics */}
-      <Stack direction="row" spacing={3} sx={{ mb: 4 }}>
-        <Card sx={{ flex: 1 }}>
-          <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <Box sx={{ 
-                p: 1.5, 
-                borderRadius: 2, 
-                bgcolor: 'primary.light',
-                color: 'primary.contrastText'
-              }}>
-                <TrendingUp />
-              </Box>
-              <Box>
-                <Typography variant="h5" fontWeight={600}>
-                  $830K
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Total Processed
-                </Typography>
-              </Box>
-            </Stack>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4" data-aos="fade-up" data-aos-delay="100">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-primary/10">
+                <TrendingUp className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-finance-accent">$830K</div>
+                <div className="text-sm text-muted-foreground">Total Processed</div>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card sx={{ flex: 1 }}>
-          <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <Box sx={{ 
-                p: 1.5, 
-                borderRadius: 2, 
-                bgcolor: 'success.light',
-                color: 'success.contrastText'
-              }}>
-                <Analytics />
-              </Box>
-              <Box>
-                <Typography variant="h5" fontWeight={600}>
-                  299
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Total Requests
-                </Typography>
-              </Box>
-            </Stack>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-success/10">
+                <BarChart3 className="w-6 h-6 text-success" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-finance-accent">299</div>
+                <div className="text-sm text-muted-foreground">Total Requests</div>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card sx={{ flex: 1 }}>
-          <CardContent>
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <Box sx={{ 
-                p: 1.5, 
-                borderRadius: 2, 
-                bgcolor: 'warning.light',
-                color: 'warning.contrastText'
-              }}>
-                <TrendingUp />
-              </Box>
-              <Box>
-                <Typography variant="h5" fontWeight={600}>
-                  2.2 days
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Avg. Approval Time
-                </Typography>
-              </Box>
-            </Stack>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-warning/10">
+                <TrendingUp className="w-6 h-6 text-warning" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-finance-accent">2.2 days</div>
+                <div className="text-sm text-muted-foreground">Avg. Approval Time</div>
+              </div>
+            </div>
           </CardContent>
         </Card>
-      </Stack>
+      </div>
 
       {/* Charts Grid */}
-      <Stack spacing={3}>
+      <div className="space-y-6">
         {/* Payment Volume Trends */}
-        <Card>
+        <Card data-aos="fade-up" data-aos-delay="200">
+          <CardHeader>
+            <CardTitle className="text-finance-accent">Payment Volume & Amount Trends</CardTitle>
+          </CardHeader>
           <CardContent>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-              Payment Volume & Amount Trends
-            </Typography>
-            <Box sx={{ height: 350 }}>
+            <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -233,18 +168,18 @@ export const ReportsDashboard: React.FC = () => {
                   <Bar yAxisId="right" dataKey="amount" fill="#388e3c" name="Amount ($)" />
                 </BarChart>
               </ResponsiveContainer>
-            </Box>
+            </div>
           </CardContent>
         </Card>
 
-        <Stack direction="row" spacing={3}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Category Breakdown */}
-          <Card sx={{ flex: 1 }}>
+          <Card data-aos="fade-up" data-aos-delay="300">
+            <CardHeader>
+              <CardTitle className="text-finance-accent">Payment Categories</CardTitle>
+            </CardHeader>
             <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Payment Categories
-              </Typography>
-              <Box sx={{ height: 300 }}>
+              <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -262,35 +197,28 @@ export const ReportsDashboard: React.FC = () => {
                     <Tooltip />
                   </PieChart>
                 </ResponsiveContainer>
-              </Box>
-              <Stack spacing={1} sx={{ mt: 2 }}>
+              </div>
+              <div className="space-y-2 mt-4">
                 {categoryData.map((item, index) => (
-                  <Stack key={index} direction="row" justifyContent="space-between" alignItems="center">
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <Box sx={{ 
-                        width: 12, 
-                        height: 12, 
-                        borderRadius: '50%', 
-                        bgcolor: item.color 
-                      }} />
-                      <Typography variant="body2">{item.name}</Typography>
-                    </Stack>
-                    <Typography variant="body2" fontWeight={600}>
-                      ${item.amount.toLocaleString()}
-                    </Typography>
-                  </Stack>
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                      <span className="text-sm">{item.name}</span>
+                    </div>
+                    <span className="text-sm font-medium">${item.amount.toLocaleString()}</span>
+                  </div>
                 ))}
-              </Stack>
+              </div>
             </CardContent>
           </Card>
 
           {/* Approval Times by Department */}
-          <Card sx={{ flex: 1 }}>
+          <Card data-aos="fade-up" data-aos-delay="400">
+            <CardHeader>
+              <CardTitle className="text-finance-accent">Approval Times by Department</CardTitle>
+            </CardHeader>
             <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Approval Times by Department
-              </Typography>
-              <Box sx={{ height: 300 }}>
+              <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={approvalTimeData} layout="horizontal">
                     <CartesianGrid strokeDasharray="3 3" />
@@ -300,12 +228,11 @@ export const ReportsDashboard: React.FC = () => {
                     <Bar dataKey="avgTime" fill="#f57c00" name="Avg Time (days)" />
                   </BarChart>
                 </ResponsiveContainer>
-              </Box>
+              </div>
             </CardContent>
           </Card>
-        </Stack>
-
-      </Stack>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 };
