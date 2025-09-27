@@ -84,7 +84,7 @@ export const LoginPage: React.FC = () => {
                 <AccountBalance sx={{ fontSize: 32 }} />
               </Avatar>
               <Typography variant="h4" component="h1" fontWeight="bold" color="primary.main">
-                FinanceFlow
+                Feature Digital LTD
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
                 Finance Department Dashboard
@@ -171,7 +171,7 @@ export const LoginPage: React.FC = () => {
                   {loading ? (
                     <CircularProgress size={24} color="inherit" />
                   ) : (
-                    'Sign In'
+                    'Log In'
                   )}
                 </Button>
               </Box>
